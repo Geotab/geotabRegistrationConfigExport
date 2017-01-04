@@ -127,7 +127,7 @@ export default class ReportsBuilder {
     };
 
     public getData (): Promise<IReportTemplate[]> {
-        let portionSize: number = 30,
+        let portionSize: number = 15,
             requestsTotal: number = 0,
             portions = Object.keys(this.allTemplatesHash).reduce((requests, templateId) => {
                 if (!this.allTemplatesHash[templateId].isSystem && !this.allTemplatesHash[templateId].binaryData) {
