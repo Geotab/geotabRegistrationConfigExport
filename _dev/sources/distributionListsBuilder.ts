@@ -62,6 +62,7 @@ export default class DistributionListsBuilder {
                     case "TextMessage":
                     case "TextToSpeechAllowDelay":
                     case "WebRequest":
+                    case "TextToSpeech":
                         id = recipient.notificationBinaryFile && recipient.notificationBinaryFile.id;
                         type = "notificationTemplates";
                         break;
