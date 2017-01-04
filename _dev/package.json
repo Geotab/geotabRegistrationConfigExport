@@ -1,0 +1,21 @@
+{
+  "name": "RegistrationConfig",
+  "version": "0.0.1",
+  "author": "nickklimkovich@geotab.com",
+  "description": "Tool for exporting default registration config in JSON file",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "scripts": {
+    "systemjs": "^0.19.31",
+    "startServer": "node ../../../start.js",
+    "watch": "watchify sources/addin.ts -p tsify --debug -o ../addin.js -dv",
+	"build": "browserify sources/addin.ts -p tsify > ../addin.js",
+    "start": "start npm run startServer & start npm run watch"
+  },
+  "dependencies": {
+    "browserify": "^13.0.1",
+    "tsify": "^0.16.0",
+    "watchify": "^3.7.0"
+  }
+}
