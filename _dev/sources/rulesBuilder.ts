@@ -87,6 +87,8 @@ export default class RulesBuilder {
                         }
                         break;
                     case "FilterStatusDataByDiagnostic":
+                    case "ActiveOrInactiveFault":
+                    case "Fault":
                         id = condition.diagnostic.id || condition.diagnostic;
                         type = "diagnostics";
                         break;
