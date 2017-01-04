@@ -89,8 +89,10 @@ export default class RulesBuilder {
                     case "FilterStatusDataByDiagnostic":
                     case "ActiveOrInactiveFault":
                     case "Fault":
-                        id = condition.diagnostic.id || condition.diagnostic;
-                        type = "diagnostics";
+                        if (condition.diagnostic) {
+                            id = condition.diagnostic.id || condition.diagnostic;
+                            type = "diagnostics";
+                        }
                         break;
                 }
                 id && type && dependencies[type].indexOf(id) === -1 && dependencies[type].push(id);
