@@ -127,11 +127,15 @@ export default class ReportsBuilder {
     };
 
     public getData (): Promise<IReportTemplate[]> {
-        let portionSize: number = 30,
+        let portionSize: number = 2,
+            requestsTotal: number = 0,
             portions = Object.keys(this.allTemplatesHash).reduce((requests, templateId) => {
                 if (!this.allTemplatesHash[templateId].isSystem && !this.allTemplatesHash[templateId].binaryData) {
-                    let portionIndex: number = requests.length % portionSize;
-                    !requests[portionIndex] && (requests[portionIndex] = []);
+                    let portionIndex: number = requests.length - 1;
+                    if (!requests[portionIndex] || requests[portionIndex].length >= portionSize) {
+                       requests.push([]);
+                       portionIndex ++;
+                    }
                     requests[portionIndex].push(["Get", {
                         "typeName": "ReportTemplate",
                         "search": {
@@ -139,6 +143,7 @@ export default class ReportsBuilder {
                             includeBinaryData: true
                         }
                     }]);
+                    requestsTotal++;
                 }
                 return requests;
             }, []),

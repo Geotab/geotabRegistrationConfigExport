@@ -185,8 +185,8 @@ export function together(promises: Promise<any>[]): Promise<any> {
                 resultsCount++;
                 results[index] = result;
                 resultsCount === promises.length && resolveAll();
-            }).error((error) => {
-                return reject({
+            }).catch((error) => {
+                reject({
                     error: error,
                     promiseIndex: index
                 });

@@ -92,7 +92,7 @@ class Addin {
             this.data.reports = reportsData;
             console.log(this.data);
             downloadDataAsFile(JSON.stringify(this.data), "export.json");
-        }).error((e) => {
+        }).catch((e) => {
             alert("Can't export data.\nPlease try again later.");
             console.error(e);
         }).finally(() => this.toggleWaiting());
@@ -196,7 +196,6 @@ class Addin {
         }, initialValue);
     };
 
-    // TODO: split to separate functions
     private resolveDependencies (dependencies: IDependencies, data: IImportData) {
         let getData = (entitiesList: IDependencies): Promise<{}> => {
                 let entityRequestTypes = {
@@ -245,7 +244,7 @@ class Addin {
                     this.addNewNotificationTemplates(entitiesList.notificationTemplates, data);
                     delete entitiesList.groups;
                     delete entitiesList.customMaps;
-                    return new Promise((resolve) => {
+                    return new Promise((resolve, reject) => {
                         let requestEntities = Object.keys(requests),
                             requestsArray = requestEntities.reduce((list, type) => list.concat(requests[type]), []);
                         if (!requestEntities.length) {
@@ -312,15 +311,12 @@ class Addin {
                                         resolve(data);
                                     }
                                 });
-                            }, () => {
-                                resolve(data);
-                            }
-                        );
+                            }, reject);
                     });
                 });
             };
         return new Promise((resolve, reject) => {
-            return getData(dependencies).then(resolve, reject);
+            return getData(dependencies).then(resolve).catch(reject);
         });
     };
 
@@ -394,7 +390,10 @@ class Addin {
             mapProvider && (mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider));
             showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
             console.log(this.data);
-        }).catch().finally(() => this.toggleWaiting());
+        }).catch((e) => {
+            console.error(e);
+            alert("Can't get config to export");
+        }).finally(() => this.toggleWaiting());
     };
 
     public unload () {
