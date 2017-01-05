@@ -49,6 +49,7 @@ export default class ReportsBuilder {
     private currentTask;
     private allReports: IReport[];
     private structuredReports;
+    private dashboardsLength: number;
     private allTemplates: IReportTemplate[];
     private allTemplatesHash: Utils.Hash;
 
@@ -68,7 +69,8 @@ export default class ReportsBuilder {
                     "search": {
                         includeBinaryData: false
                     }
-                }]
+                }],
+                ["GetDashboardItems", {}]
             ], resolve, reject);
         });
     };
@@ -96,11 +98,12 @@ export default class ReportsBuilder {
     public fetch (): Promise<any> {
         this.abortCurrentTask();
         this.currentTask = this.getReports()
-            .then(([reports, templates]) => {
+            .then(([reports, templates, dashboardItems]) => {
                 this.allReports = reports;
                 this.allTemplates = templates;
+                this.dashboardsLength = dashboardItems && dashboardItems.length ? dashboardItems.length : 0;
                 this.structuredReports = this.structureReports(reports, templates);
-                this.allTemplatesHash = Utils.entityToDictionary(templates, entity => Utils.extend({}, entity));
+                this.allTemplatesHash = Utils.entityToDictionary(templates);
                 return this.structuredReports;
             })
             .catch(console.error)
@@ -188,10 +191,7 @@ export default class ReportsBuilder {
     };
 
     public getDashboardsQty (): number {
-        return this.allReports.reduce((qty, report: IReport) => {
-            report && report.destination && report.destination === REPORT_TYPE_DASHBOAD && qty++;
-            return qty;
-        }, 0);
+        return this.dashboardsLength;
     };
 
     public getCustomizedReportsQty (): number {
