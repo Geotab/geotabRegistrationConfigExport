@@ -15,25 +15,6 @@ export interface IDistributionListDependencies {
     groups?: any[];
 }
 
-const AVAILABLE_RECIPIENT_TYPES = [
-    "AssignToGroup",
-    "BeepTenTimesRapidly",
-    "BeepTenTimesRapidlyAllowDelay",
-    "BeepThreeTimes",
-    "BeepThreeTimesAllowDelay",
-    "BeepThreeTimesRapidly",
-    "BeepThreeTimesRapidlyAllowDelay",
-    "ChangeStatus",
-    "Email",
-    "LogOnly",
-    "LogPopup",
-    "LogUrgentPopup",
-    "TextMessage",
-    "TextToSpeech",
-    "TextToSpeechAllowDelay",
-    "WebRequest"
-];
-
 export default class DistributionListsBuilder {
     private api;
     private currentTask;
@@ -61,14 +42,6 @@ export default class DistributionListsBuilder {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
     };
-
-    // Remove recipients that are not in allowed recipients list
-    private filterRecipients (distributionLists: IDistributionList[]) {
-        return distributionLists.map((listItem: IDistributionList) => {
-            listItem.recipients = listItem.recipients.filter((recipient) => AVAILABLE_RECIPIENT_TYPES.indexOf(recipient.recipientType) > -1);
-            return listItem;
-        });
-    }
 
     public getDependencies (distributionLists): IDistributionListDependencies {
         let dependencies: IDistributionListDependencies = {
@@ -117,7 +90,7 @@ export default class DistributionListsBuilder {
         this.abortCurrentTask();
         this.currentTask = this.getDistributionListsData()
             .then(([distributionLists, webTemplates, emailTemplates, textTemplates]) => {
-                this.distributionLists = entityToDictionary(this.filterRecipients(distributionLists));
+                this.distributionLists = entityToDictionary(distributionLists);
                 this.notificationTemplates = entityToDictionary(webTemplates.concat(emailTemplates).concat(textTemplates));
                 return this.distributionLists;
             })

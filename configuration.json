@@ -4,7 +4,7 @@
     "version": "1.0",
     "items": [{
             "url": "registrationConfig.html",
-            "path": "AdministrationLink/",
+            "path": "AddInsInDevelop/",
             "menuName": {
                 "en": "Registration config"
             }

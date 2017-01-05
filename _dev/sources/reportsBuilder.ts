@@ -9,6 +9,9 @@ interface IReport {
     includeAllChildrenGroups: IGroup[];
     includeDirectChildrenOnlyGroups: IGroup[];
     scopeGroups: IGroup[];
+    destination?: string;
+    template: IReportTemplate;
+    lastModifiedUser;
     arguments: {
         rules?: any[];
         devices?: any[];
@@ -44,8 +47,9 @@ interface IReportTemplate {
 export default class ReportsBuilder {
     private api;
     private currentTask;
-    private allReports;
+    private allReports: IReport[];
     private structuredReports;
+    private allTemplates: IReportTemplate[];
     private allTemplatesHash: Utils.Hash;
 
     constructor(api) {
@@ -93,8 +97,8 @@ export default class ReportsBuilder {
         this.abortCurrentTask();
         this.currentTask = this.getReports()
             .then(([reports, templates]) => {
-                ////reports = this.getCustomizedReports(reports);
                 this.allReports = reports;
+                this.allTemplates = templates;
                 this.structuredReports = this.structureReports(reports, templates);
                 this.allTemplatesHash = Utils.entityToDictionary(templates, entity => Utils.extend({}, entity));
                 return this.structuredReports;
@@ -129,8 +133,8 @@ export default class ReportsBuilder {
     public getData (): Promise<IReportTemplate[]> {
         let portionSize: number = 15,
             requestsTotal: number = 0,
-            portions = Object.keys(this.allTemplatesHash).reduce((requests, templateId) => {
-                if (!this.allTemplatesHash[templateId].isSystem && !this.allTemplatesHash[templateId].binaryData) {
+            portions = this.allTemplates.reduce((requests, template: IReportTemplate) => {
+                if (!template.isSystem && !template.binaryData) {
                     let portionIndex: number = requests.length - 1;
                     if (!requests[portionIndex] || requests[portionIndex].length >= portionSize) {
                        requests.push([]);
@@ -139,7 +143,7 @@ export default class ReportsBuilder {
                     requests[portionIndex].push(["Get", {
                         "typeName": "ReportTemplate",
                         "search": {
-                            id: templateId,
+                            id: template.id,
                             includeBinaryData: true
                         }
                     }]);
@@ -147,23 +151,33 @@ export default class ReportsBuilder {
                 }
                 return requests;
             }, []),
-            promises = portions.reduce((promises, portion) => {
-                let promise = new Promise((resolve, reject) => {
+            totalResults = [],
+            getPortionData = (portion) => {
+                return new Promise((resolve, reject) => {
                     this.api.multiCall(portion, resolve, reject);
                 });
-                promises.push(promise);
-                return promises;
-            }, []);
+            },
+            errorPortions = [];
 
         this.abortCurrentTask();
-        this.currentTask = Utils.together(promises).then((portions: any[][]) => {
-            portions.forEach(portion => {
+        this.currentTask = portions.reduce((promises, portion, index) => {
+            return promises.then((result) => {
+                totalResults.push(result);
+                return getPortionData(portion);
+            }).catch((e) => {
+                errorPortions.concat(portions[index - 1]);
+                console.error(e);
+                return getPortionData(portion);
+            });
+        }, new Promise(resolve => resolve([]))).then((lastResult) => {
+            totalResults = totalResults.concat(lastResult);
+            totalResults.forEach(portion => {
                 portion.forEach((templateData) => {
                     let template: IReportTemplate = templateData.length ? templateData[0] : templateData;
                     this.allTemplatesHash[template.id] = template;
                 });
             });
-            this.structuredReports = this.structureReports(this.allReports, Object.keys(this.allTemplatesHash).map(templateId => this.allTemplatesHash[templateId]));
+            this.structuredReports = this.structureReports(this.allReports, this.allTemplates);
             return this.structuredReports;
         })
         .catch(console.error)
@@ -174,7 +188,7 @@ export default class ReportsBuilder {
     };
 
     public getDashboardsQty (): number {
-        return this.allReports.reduce((qty, report) => {
+        return this.allReports.reduce((qty, report: IReport) => {
             report && report.destination && report.destination === REPORT_TYPE_DASHBOAD && qty++;
             return qty;
         }, 0);
@@ -182,7 +196,7 @@ export default class ReportsBuilder {
 
     public getCustomizedReportsQty (): number {
         let templates = [];
-        return (this.allReports.filter(report => {
+        return (this.allReports.filter((report: IReport) => {
             let templateId = report.template.id,
                 templateExists: boolean = templates.indexOf(templateId) > -1,
                 isCount: boolean = !templateExists && report.lastModifiedUser !== "NoUserId";
