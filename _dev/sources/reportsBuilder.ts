@@ -95,6 +95,16 @@ export default class ReportsBuilder {
         this.currentTask = null;
     };
 
+    private updateTemplate (newTemplateData: IReportTemplate) {
+        this.allTemplates.some((templateData: IReportTemplate, index: number) => {
+            if(templateData.id === newTemplateData.id) {
+                this.allTemplates[index] = newTemplateData;
+                return true;
+            }
+            return false;
+        })
+    }
+
     public fetch (): Promise<any> {
         this.abortCurrentTask();
         this.currentTask = this.getReports()
@@ -177,7 +187,7 @@ export default class ReportsBuilder {
             totalResults.forEach(portion => {
                 portion.forEach((templateData) => {
                     let template: IReportTemplate = templateData.length ? templateData[0] : templateData;
-                    this.allTemplatesHash[template.id] = template;
+                    this.updateTemplate(template);
                 });
             });
             this.structuredReports = this.structureReports(this.allReports, this.allTemplates);
