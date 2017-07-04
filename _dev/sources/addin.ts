@@ -374,7 +374,7 @@ class Addin {
                 distributionListsDependencies: IDependencies,
                 dependencies: IDependencies,
                 customMap;
-            this.data.groups = [];
+            this.data.groups = results[0];
             this.data.securityGroups = results[1];
             this.data.reports = results[2];
             this.data.rules = results[3];
