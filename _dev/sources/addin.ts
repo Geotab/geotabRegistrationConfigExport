@@ -1,4 +1,5 @@
 import GroupsBuilder from "./groupsBuilder";
+import SecurityClearancesBuilder from "./securityClearancesBuilder";
 import ReportsBuilder from "./reportsBuilder";
 import RulesBuilder from "./rulesBuilder";
 import DistributionListsBuilder from "./distributionListsBuilder";
@@ -51,6 +52,7 @@ declare const geotab: Geotab;
 class Addin {
     private api;
     private groupsBuilder: GroupsBuilder;
+    private securityClearancesBuilder: SecurityClearancesBuilder;
     private reportsBuilder: ReportsBuilder;
     private rulesBuilder: RulesBuilder;
     private distributionListsBuilder: DistributionListsBuilder;
@@ -79,6 +81,7 @@ class Addin {
     constructor (api) {
         this.api = api;
         this.groupsBuilder = new GroupsBuilder(api);
+        this.securityClearancesBuilder = new SecurityClearancesBuilder(api);
         this.reportsBuilder = new ReportsBuilder(api);
         this.rulesBuilder = new RulesBuilder(api);
         this.distributionListsBuilder = new DistributionListsBuilder(api);
@@ -344,6 +347,7 @@ class Addin {
         let hasItemsMessageTemplate: string = document.getElementById("hasItemsMessageTemplate").innerHTML,
             mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
             groupsBlock: HTMLElement = document.getElementById("exportedGroups"),
+            securityClearancesBlock: HTMLElement = document.getElementById("exportedSecurityClearances"),
             rulesBlock: HTMLElement = document.getElementById("exportedRules"),
             reportsBlock: HTMLElement = document.getElementById("exportedReports"),
             dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards"),
@@ -359,6 +363,7 @@ class Addin {
         this.toggleWaiting(true);
         together([
             this.groupsBuilder.fetch(),
+            this.securityClearancesBuilder.fetch(),
             this.reportsBuilder.fetch(),
             this.rulesBuilder.fetch(),
             this.distributionListsBuilder.fetch(),
@@ -369,11 +374,12 @@ class Addin {
                 distributionListsDependencies: IDependencies,
                 dependencies: IDependencies,
                 customMap;
-            this.data.groups = results[0];
-            this.data.reports = results[1];
-            this.data.rules = results[2];
+            this.data.groups = [];
+            this.data.securityGroups = results[1];
+            this.data.reports = results[2];
+            this.data.rules = results[3];
             this.data.distributionLists = this.distributionListsBuilder.getRulesDistributionLists(this.data.rules.map(rule => rule.id));
-            this.data.misc = results[4];
+            this.data.misc = results[5];
             customMap = this.miscBuilder.getMapProviderData(this.data.misc.mapProvider.value);
             customMap && this.data.customMaps.push(customMap);
             reportsDependencies = this.reportsBuilder.getDependencies(this.data.reports);
@@ -384,6 +390,7 @@ class Addin {
         }).then(() => {
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
             showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
+            showEntityMessage(securityClearancesBlock, this.data.securityGroups.length, "security clearance");
             showEntityMessage(rulesBlock, this.data.rules.length, "rule");
             showEntityMessage(reportsBlock, this.reportsBuilder.getCustomizedReportsQty(), "report");
             showEntityMessage(dashboardsBlock, this.reportsBuilder.getDashboardsQty(), "dashboard");
@@ -399,6 +406,7 @@ class Addin {
     public unload () {
         this.abortCurrentTask();
         this.groupsBuilder.unload();
+        this.securityClearancesBuilder.unload();
         this.reportsBuilder.unload();
         this.rulesBuilder.unload();
         this.distributionListsBuilder.unload();

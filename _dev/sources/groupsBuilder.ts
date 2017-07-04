@@ -18,15 +18,16 @@ interface IGroup {
 }
 
 export default class GroupsBuilder {
-    private api;
-    private groups: IGroup[];
+    protected api;
+    protected currentTask;
+    protected groups: IGroup[];
+    protected tree: IGroup[];
+    protected currentTree;
+
     private users: any;
     private currentUserName: string;
-    private tree: IGroup[];
-    private currentTree;
-    private currentTask;
 
-    constructor(api) {
+    constructor(api: any) {
         this.api = api;
     }
 
@@ -43,45 +44,6 @@ export default class GroupsBuilder {
                     }]
                 ], resolve, reject);
             });
-        });
-    };
-
-    private createGroupsTree (groups: IGroup[]): any[] {
-        let nodeLookup,
-            traverseChildren = function (node) {
-                let children: IGroup[],
-                    id: string;
-
-                children = node.children;
-
-                if (children) {
-                    for (let i = 0, ii = children.length; i < ii; i += 1) {
-                        id = children[i].id;
-
-                        if (nodeLookup[id]) {
-                            node.children[i] = nodeLookup[id];
-                            node.children[i].parent = node;
-                            delete nodeLookup[id];
-                        }
-                        traverseChildren(node.children[i]);
-                    }
-                }
-            };
-
-        nodeLookup = Utils.entityToDictionary(groups, entity => {
-            let newEntity = Utils.extend({}, entity);
-            if (newEntity.children) {
-                newEntity.children = newEntity.children.slice();
-            }
-            return newEntity;
-        });
-
-        Object.keys(nodeLookup).forEach(function (key) {
-            nodeLookup[key] && traverseChildren(nodeLookup[key]);
-        });
-
-        return Object.keys(nodeLookup).map(key => {
-            return nodeLookup[key];
         });
     };
 
@@ -111,14 +73,14 @@ export default class GroupsBuilder {
 
     private getUserByPrivateGroupId (groupId: string): any {
         let outputUser = null,
-            userHasPrivateGroup = (user, groupId) => {
-                return user.privateUserGroups.some(function(group) {
+            userHasPrivateGroup = (user, groupId): boolean => {
+                return user.privateUserGroups.some(group => {
                     if (group.id === groupId) {
                         return true;
                     }
                 });
             };
-        this.users.some(function(user) {
+        this.users.some(user => {
             if (userHasPrivateGroup(user, groupId)) {
                 outputUser = user;
                 return true;
@@ -128,10 +90,58 @@ export default class GroupsBuilder {
     };
 
     private getPrivateGroupData (groupId: string) {
-        return {id: groupId, user: this.getUserByPrivateGroupId(groupId), children: [], name: "PrivateUserGroupName", parent: {id: "GroupPrivateUserId", children: [{ id: groupId }]}};
+        return {
+            id: groupId,
+            user: this.getUserByPrivateGroupId(groupId),
+            children: [],
+            name: "PrivateUserGroupName",
+            parent: {
+                id: "GroupPrivateUserId",
+                children: [{ id: groupId }]
+            }
+        };
     };
 
-    private abortCurrentTask (): void {
+    protected createGroupsTree (groups: IGroup[]): any[] {
+        let nodeLookup,
+            traverseChildren = function (node) {
+                let children: IGroup[],
+                    id: string;
+
+                children = node.children;
+
+                if (children) {
+                    for (let i = 0, ii = children.length; i < ii; i += 1) {
+                        id = children[i].id;
+
+                        if (nodeLookup[id]) {
+                            node.children[i] = nodeLookup[id];
+                            node.children[i].parent = node;
+                            delete nodeLookup[id];
+                        }
+                        traverseChildren(node.children[i]);
+                    }
+                }
+            };
+
+        nodeLookup = Utils.entityToDictionary(groups, entity => {
+            let newEntity = Utils.extend({}, entity);
+            if (newEntity.children) {
+                newEntity.children = newEntity.children.slice();
+            }
+            return newEntity;
+        });
+
+        Object.keys(nodeLookup).forEach(key => {
+            nodeLookup[key] && traverseChildren(nodeLookup[key]);
+        });
+
+        return Object.keys(nodeLookup).map(key => {
+            return nodeLookup[key];
+        });
+    };
+
+    protected abortCurrentTask (): void {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
     };
@@ -192,13 +202,17 @@ export default class GroupsBuilder {
     };
 
     public getGroupsData (groupIds: string[], notIncludeChildren: boolean = false): IGroup[] {
-        let treeGroups = groupIds.map(groupId => (this.findChild(groupId, {id: null, children: this.tree}, true) || this.getPrivateGroupData(groupId)));
+        let treeGroups = groupIds.map(groupId =>
+            this.findChild(groupId, {id: null, children: this.tree}, true) || this.getPrivateGroupData(groupId)
+        );
         return this.createFlatGroupsList(treeGroups, notIncludeChildren);
     };
 
     public getCustomGroupsData (groupIds: string[], allGroups: IGroup[]): IGroup[] {
         let groupsTree = this.createGroupsTree(allGroups),
-            treeGroups = groupIds.map(groupId => (this.findChild(groupId, {id: null, children: groupsTree}, true) || this.getPrivateGroupData(groupId)));
+            treeGroups = groupIds.map(groupId => 
+                this.findChild(groupId, {id: null, children: groupsTree}, true) || this.getPrivateGroupData(groupId)
+            );
         return this.createFlatGroupsList(treeGroups, true);
     };
 
