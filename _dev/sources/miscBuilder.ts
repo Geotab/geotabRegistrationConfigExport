@@ -20,11 +20,9 @@ export class MiscBuilder {
     private isUnsignedAddinsAllowed;
     private addins;
     private defaultMapProviders = {
-        OpenStreet: "Open Street Maps"
-    };
-    private additionalMapProviders = {
         GoogleMaps: "Google Maps",
-        Here: "HERE Maps"
+        Here: "HERE Maps",
+        MapBox: "MapBox"
     };
 
     constructor(api) {
@@ -66,7 +64,9 @@ export class MiscBuilder {
         }).then((result) => {
             let currentUser = result[0][0] || result[0],
                 systemSettings = result[1][0] || result[1],
-                mapProviderId = currentUser.defaultMapEngine;
+                userMapProviderId = currentUser.defaultMapEngine,
+                defaultMapProviderId = systemSettings.mapProvider,
+                mapProviderId = this.getMapProviderType(userMapProviderId) === "custom" ? userMapProviderId : defaultMapProviderId;
             this.currentUser = currentUser;
             this.customMapProviders = entityToDictionary(systemSettings.customWebMapProviderList);
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
@@ -85,11 +85,11 @@ export class MiscBuilder {
     };
 
     public getMapProviderType (mapProviderId: string): TMapProviderType {
-        return (this.defaultMapProviders[mapProviderId] && "default") || (this.additionalMapProviders[mapProviderId] && "additional") || "custom";
+        return this.defaultMapProviders[mapProviderId] ? "default" : "custom";
     };
 
     public getMapProviderName (mapProviderId: string): string {
-        return mapProviderId && (this.defaultMapProviders[mapProviderId] || this.additionalMapProviders[mapProviderId] || this.customMapProviders[mapProviderId].name);
+        return mapProviderId && (this.defaultMapProviders[mapProviderId] || (this.customMapProviders[mapProviderId] && this.customMapProviders[mapProviderId].name) || mapProviderId);
     };
 
     public getMapProviderData (mapProviderId: string): any {
