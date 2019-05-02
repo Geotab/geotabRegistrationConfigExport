@@ -51,11 +51,6 @@ export default class ReportsBuilder {
     private structuredReports;
     private dashboardsLength: number;
     private allTemplates: IReportTemplate[];
-    private allTemplatesHash: Utils.Hash;
-
-    constructor(api) {
-        this.api = api;
-    }
 
     private getReports (): Promise<any> {
         return new Promise((resolve, reject) => {
@@ -73,7 +68,7 @@ export default class ReportsBuilder {
                 ["GetDashboardItems", {}]
             ], resolve, reject);
         });
-    };
+    }
 
     private structureReports (reports, templates) {
         let findTemplateReports = (templateId) => {
@@ -88,21 +83,25 @@ export default class ReportsBuilder {
             }
             return res;
         }, []);
-    };
+    }
 
     private abortCurrentTask (): void {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
-    };
+    }
 
     private updateTemplate (newTemplateData: IReportTemplate) {
         this.allTemplates.some((templateData: IReportTemplate, index: number) => {
-            if(templateData.id === newTemplateData.id) {
+            if (templateData.id === newTemplateData.id) {
                 this.allTemplates[index] = newTemplateData;
                 return true;
             }
             return false;
-        })
+        });
+    }
+
+    constructor(api) {
+        this.api = api;
     }
 
     public fetch (): Promise<any> {
@@ -113,7 +112,6 @@ export default class ReportsBuilder {
                 this.allTemplates = templates;
                 this.dashboardsLength = dashboardItems && dashboardItems.length ? dashboardItems.length : 0;
                 this.structuredReports = this.structureReports(reports, templates);
-                this.allTemplatesHash = Utils.entityToDictionary(templates);
                 return this.structuredReports;
             })
             .catch(console.error)
@@ -121,31 +119,31 @@ export default class ReportsBuilder {
                 this.currentTask = null;
             });
         return this.currentTask;
-    };
+    }
 
     public getDependencies (reports: IReportTemplate[]): IReportDependencies {
-        let dependencies: IReportDependencies = {
+        let allDependencies: IReportDependencies = {
                 devices: [],
                 rules: [],
                 zoneTypes: [],
                 groups: []
             };
-        return reports.reduce((dependencies: IReportDependencies, template: IReportTemplate) => {
-            return template.reports.reduce((dependencies, report) => {
-                dependencies.groups = Utils.mergeUnique(dependencies.groups, Utils.getEntitiesIds(report.groups),
+        return reports.reduce((reportsDependencies: IReportDependencies, template: IReportTemplate) => {
+            return template.reports.reduce((templateDependecies, report) => {
+                templateDependecies.groups = Utils.mergeUnique(templateDependecies.groups, Utils.getEntitiesIds(report.groups),
                     Utils.getEntitiesIds(report.includeAllChildrenGroups), Utils.getEntitiesIds(report.includeDirectChildrenOnlyGroups),
                     Utils.getEntitiesIds(report.scopeGroups));
-                dependencies.devices = Utils.mergeUnique(dependencies.devices, report.arguments && report.arguments.devices && Utils.getEntitiesIds(report.arguments.devices) || []);
-                dependencies.rules = Utils.mergeUnique(dependencies.rules, report.arguments && report.arguments.rules && Utils.getEntitiesIds(report.arguments.rules) || []);
-                dependencies.zoneTypes = Utils.mergeUnique(dependencies.zoneTypes, report.arguments && report.arguments.zoneTypeList && Utils.getEntitiesIds(report.arguments.zoneTypeList) || []);
-                return dependencies;
-            }, dependencies);
-        }, dependencies);
-    };
+                templateDependecies.devices = Utils.mergeUnique(templateDependecies.devices, report.arguments && report.arguments.devices && Utils.getEntitiesIds(report.arguments.devices) || []);
+                templateDependecies.rules = Utils.mergeUnique(templateDependecies.rules, report.arguments && report.arguments.rules && Utils.getEntitiesIds(report.arguments.rules) || []);
+                templateDependecies.zoneTypes = Utils.mergeUnique(
+                    templateDependecies.zoneTypes, report.arguments && report.arguments.zoneTypeList && Utils.getEntitiesIds(report.arguments.zoneTypeList) || []);
+                return templateDependecies;
+            }, reportsDependencies);
+        }, allDependencies);
+    }
 
     public getData (): Promise<IReportTemplate[]> {
-        let portionSize: number = 15,
-            requestsTotal: number = 0,
+        let portionSize = 15,
             portions = this.allTemplates.reduce((requests, template: IReportTemplate) => {
                 if (!template.isSystem && !template.binaryData) {
                     let portionIndex: number = requests.length - 1;
@@ -160,13 +158,12 @@ export default class ReportsBuilder {
                             includeBinaryData: true
                         }
                     }]);
-                    requestsTotal++;
                 }
                 return requests;
             }, []),
-            totalResults = [],
-            getPortionData = (portion) => {
-                return new Promise((resolve, reject) => {
+            totalResults: any[][] = [],
+            getPortionData = portion => {
+                return new Promise<any>((resolve, reject) => {
                     this.api.multiCall(portion, resolve, reject);
                 });
             },
@@ -174,35 +171,34 @@ export default class ReportsBuilder {
 
         this.abortCurrentTask();
         this.currentTask = portions.reduce((promises, portion, index) => {
-            return promises.then((result) => {
-                totalResults.push(result);
-                return getPortionData(portion);
-            }).catch((e) => {
-                errorPortions.concat(portions[index - 1]);
-                console.error(e);
-                return getPortionData(portion);
-            });
-        }, new Promise(resolve => resolve([]))).then((lastResult) => {
-            totalResults = totalResults.concat(lastResult);
-            totalResults.forEach(portion => {
-                portion.forEach((templateData) => {
+                return promises.then((result) => {
+                    totalResults = totalResults.concat(result);
+                    return getPortionData(portion);
+                }).catch((e) => {
+                    errorPortions = errorPortions.concat(portions[index - 1]);
+                    console.error(e);
+                    return getPortionData(portion);
+                });
+            }, Utils.resolvedPromise([]))
+            .then((lastResult) => {
+                totalResults = totalResults.concat(lastResult);
+                totalResults.forEach(templateData => {
                     let template: IReportTemplate = templateData.length ? templateData[0] : templateData;
                     this.updateTemplate(template);
                 });
+                this.structuredReports = this.structureReports(this.allReports, this.allTemplates);
+                return this.structuredReports;
+            })
+            .catch(console.error)
+            .finally(() => {
+                this.currentTask = null;
             });
-            this.structuredReports = this.structureReports(this.allReports, this.allTemplates);
-            return this.structuredReports;
-        })
-        .catch(console.error)
-        .finally(() => {
-            this.currentTask = null;
-        });
         return this.currentTask;
-    };
+    }
 
     public getDashboardsQty (): number {
         return this.dashboardsLength;
-    };
+    }
 
     public getCustomizedReportsQty (): number {
         let templates = [];
@@ -213,9 +209,9 @@ export default class ReportsBuilder {
             isCount && templates.push(templateId);
             return isCount;
         })).length;
-    };
+    }
 
     public unload (): void {
         this.abortCurrentTask();
-    };
+    }
 }

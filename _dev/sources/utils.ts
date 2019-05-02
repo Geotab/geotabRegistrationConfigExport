@@ -26,7 +26,7 @@ let classNameCtrl = function (el: Element): IClassControl {
         return Object.prototype.toString.call(obj).indexOf("Object") !== -1;
     };
 
-export interface Hash {
+export interface IHash {
     [id: string]: any;
 }
 
@@ -85,7 +85,7 @@ export function extend(...args: any[]) {
     return res;
 }
 
-export function entityToDictionary(entities: any[], entityCallback?: (entity: any) => any): Hash {
+export function entityToDictionary(entities: any[], entityCallback?: (entity: any) => any): IHash {
     var entity, o = {}, i,
         l = entities.length;
 
@@ -99,7 +99,7 @@ export function entityToDictionary(entities: any[], entityCallback?: (entity: an
 }
 
 export function sortArrayOfEntities(entities: any[], sortingFields: [ISortProperty]): any[] {
-    let comparator = (prevItem, nextItem, properties: any[], index: number = 0) => {
+    let comparator = (prevItem, nextItem, properties: any[], index = 0) => {
         if (properties.length <= index) {
             return 0;
         }
@@ -112,7 +112,7 @@ export function sortArrayOfEntities(entities: any[], sortingFields: [ISortProper
         } else if (prevItem[property] < nextItem[property]) {
             return -1 * dirMultiplier;
         } else {
-            return comparator(prevItem, nextItem, properties, ++index);
+            return comparator(prevItem, nextItem, properties, index + 1);
         }
     };
     return entities.sort((prevTemplate, nextTemplate) => {
@@ -120,7 +120,7 @@ export function sortArrayOfEntities(entities: any[], sortingFields: [ISortProper
     });
 }
 
-export function downloadDataAsFile(data: string, filename: string, mimeType: string = "text/json") {
+export function downloadDataAsFile(data: string, filename: string, mimeType = "text/json") {
     let blob = new Blob([data], {type: mimeType}),
         elem;
     if (window.navigator.msSaveOrOpenBlob) {
@@ -174,7 +174,7 @@ export function getUniqueEntities (newEntities: IEntity[], existedEntities: IEnt
 
 export function together(promises: Promise<any>[]): Promise<any> {
     let results = [],
-        resultsCount: number = 0;
+        resultsCount = 0;
     results.length = promises.length;
     return new Promise((resolve, reject) => {
         let resolveAll = () => {
@@ -195,6 +195,10 @@ export function together(promises: Promise<any>[]): Promise<any> {
     });
 }
 
-export function resolvedPromise (): Promise<{}> {
-    return new Promise(resolve => resolve());
+export function resolvedPromise<T> (val?: T): Promise<T> {
+    return new Promise<T>(resolve => resolve(val));
+}
+
+export function toArray (data) {
+    return Array.isArray(data) ? data : [data];
 }
