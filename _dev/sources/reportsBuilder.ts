@@ -170,18 +170,19 @@ export default class ReportsBuilder {
             errorPortions = [];
 
         this.abortCurrentTask();
-        this.currentTask = portions.reduce((promises, portion, index) => {
-                return promises.then((result) => {
-                    totalResults = totalResults.concat(result);
-                    return getPortionData(portion);
-                }).catch((e) => {
-                    errorPortions = errorPortions.concat(portions[index - 1]);
-                    console.error(e);
-                    return getPortionData(portion);
-                });
+        this.currentTask = portions.reduce((promises, portion) => {
+                return promises
+                    .then(() => getPortionData(portion))
+                    .then(result => {
+                            totalResults = totalResults.concat(result);
+                        }, e => {
+                            errorPortions = errorPortions.concat(portion);
+                            console.error(e);
+                        }
+                    );
             }, Utils.resolvedPromise([]))
-            .then((lastResult) => {
-                totalResults = totalResults.concat(lastResult);
+            .then(() => {
+                errorPortions.length && console.warn(errorPortions);
                 totalResults.forEach(templateData => {
                     let template: IReportTemplate = templateData.length ? templateData[0] : templateData;
                     this.updateTemplate(template);
