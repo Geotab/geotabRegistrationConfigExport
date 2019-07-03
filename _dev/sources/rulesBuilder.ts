@@ -112,7 +112,9 @@ export default class RulesBuilder {
             };
         return rules.reduce((dependencies: IRuleDependencies, rule: IRule) => {
             dependencies.groups = mergeUnique(dependencies.groups, rule.groups.map(group => group.id));
-            dependencies = checkConditions(rule.condition, dependencies);
+            if (rule.condition) {
+                dependencies = checkConditions(rule.condition, dependencies);
+            }
             return dependencies;
         }, dependencies);
     }
