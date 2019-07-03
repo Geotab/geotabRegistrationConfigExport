@@ -10,12 +10,13 @@
     "systemjs": "^0.19.31",
     "startServer": "node ../../../start.js",
     "watch": "watchify sources/addin.ts -p tsify --debug -o ../addin.js -dv",
-	"build": "browserify sources/addin.ts -p tsify > ../addin.js",
+    "build": "browserify sources/addin.ts -p tsify > ../addin.js",
     "start": "start npm run startServer & start npm run watch"
   },
   "dependencies": {
-    "browserify": "^13.0.1",
-    "tsify": "^0.16.0",
-    "watchify": "^3.7.0"
+    "browserify": "^16.2.3",
+    "tsify": "^4.0.1",
+    "typescript": "^3.5.2",
+    "watchify": "^3.11.1"
   }
 }

@@ -45,7 +45,7 @@ interface IReportTemplate {
 }
 
 export default class ReportsBuilder {
-    private api;
+    private readonly api;
     private currentTask;
     private allReports: IReport[];
     private structuredReports;

@@ -50,17 +50,17 @@ interface IDependencies {
 declare const geotab: Geotab;
 
 class Addin {
-    private api;
-    private groupsBuilder: GroupsBuilder;
-    private securityClearancesBuilder: SecurityClearancesBuilder;
-    private reportsBuilder: ReportsBuilder;
-    private rulesBuilder: RulesBuilder;
-    private distributionListsBuilder: DistributionListsBuilder;
-    private miscBuilder: MiscBuilder;
-    private exportBtn: HTMLElement = document.getElementById("exportButton");
-    private waiting: Waiting;
+    private readonly api;
+    private readonly groupsBuilder: GroupsBuilder;
+    private readonly securityClearancesBuilder: SecurityClearancesBuilder;
+    private readonly reportsBuilder: ReportsBuilder;
+    private readonly rulesBuilder: RulesBuilder;
+    private readonly distributionListsBuilder: DistributionListsBuilder;
+    private readonly miscBuilder: MiscBuilder;
+    private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
+    private readonly waiting: Waiting;
     private currentTask;
-    private data: IImportData = {
+    private readonly data: IImportData = {
         groups: [],
         reports: [],
         rules: [],
@@ -76,29 +76,6 @@ class Addin {
         diagnostics: [],
         misc: null,
         notificationTemplates: []
-    };
-
-    constructor (api) {
-        this.api = api;
-        this.groupsBuilder = new GroupsBuilder(api);
-        this.securityClearancesBuilder = new SecurityClearancesBuilder(api);
-        this.reportsBuilder = new ReportsBuilder(api);
-        this.rulesBuilder = new RulesBuilder(api);
-        this.distributionListsBuilder = new DistributionListsBuilder(api);
-        this.miscBuilder = new MiscBuilder(api);
-        this.waiting = new Waiting();
-    }
-
-    exportData = () => {
-        this.toggleWaiting(true);
-        this.reportsBuilder.getData().then((reportsData) => {
-            this.data.reports = reportsData;
-            console.log(this.data);
-            downloadDataAsFile(JSON.stringify(this.data), "export.json");
-        }).catch((e) => {
-            alert("Can't export data.\nPlease try again later.");
-            console.error(e);
-        }).finally(() => this.toggleWaiting());
     };
 
     private combineDependencies (...allDependencies: IDependencies[]): IDependencies {
@@ -121,7 +98,7 @@ class Addin {
             dependencies[dependencyName] = mergeUnique(dependencies[dependencyName], ...allDependencies.map((entityDependencies) => entityDependencies[dependencyName]));
             return dependencies;
         }, total);
-    };
+    }
 
     private addNewGroups (groups: string[], data: IImportData): Promise<any> {
         if (!groups || !groups.length) {
@@ -132,7 +109,7 @@ class Addin {
         data.groups = mergeUniqueEntities(data.groups, groupsData);
         data.users = mergeUniqueEntities(data.users, newGroupsUsers);
         return this.resolveDependencies({users: getEntitiesIds(newGroupsUsers)}, data);
-    };
+    }
 
     private addNewCustomMaps (customMapsIds: string[], data: IImportData) {
         if (!customMapsIds || !customMapsIds.length) {
@@ -144,7 +121,7 @@ class Addin {
             return data;
         }, []);
         data.customMaps = mergeUniqueEntities(data.customMaps, customMapsData);
-    };
+    }
 
     private addNewNotificationTemplates (notificationTemplatesIds: string[], data: IImportData) {
         if (!notificationTemplatesIds || !notificationTemplatesIds.length) {
@@ -156,14 +133,14 @@ class Addin {
             return data;
         }, []);
         data.notificationTemplates = mergeUniqueEntities(data.notificationTemplates, notificationTemplatesData);
-    };
+    }
 
     private getEntytiesIds (entities: IEntity[]): string[] {
         return entities.reduce((res, entity) => {
             entity && entity.id && res.push(entity.id);
             return res;
         }, []);
-    };
+    }
 
     private getEntityDependencies (entity: IEntity, entityType) {
         let entityDependencies: IDependencies = {};
@@ -185,22 +162,24 @@ class Addin {
             case "workTimes":
                 entity["holidayGroup"].groupId && (entityDependencies.workHolidays = [entity["holidayGroup"].groupId]);
                 break;
+            default:
+                break;
         }
         return entityDependencies;
-    };
+    }
 
     private applyToEntities (entitiesList: IDependencies, initialValue, func: (result, entity, entityType: string, entityIndex: number, entityTypeIndex: number, overallIndex: number) => any) {
         let overallIndex = 0;
         return Object.keys(entitiesList).reduce((result, entityType, typeIndex) => {
-            return entitiesList[entityType].reduce((result, entity, index) => {
+            return entitiesList[entityType].reduce((res, entity, index) => {
                 overallIndex++;
-                return func(result, entity, entityType, index, typeIndex, overallIndex - 1);
+                return func(res, entity, entityType, index, typeIndex, overallIndex - 1);
             }, result);
         }, initialValue);
-    };
+    }
 
     private resolveDependencies (dependencies: IDependencies, data: IImportData) {
-        let getData = (entitiesList: IDependencies): Promise<{}> => {
+        let getData = (entitiesList: IDependencies): Promise<IImportData> => {
                 let entityRequestTypes = {
                         devices: "Device",
                         users: "User",
@@ -247,7 +226,7 @@ class Addin {
                     this.addNewNotificationTemplates(entitiesList.notificationTemplates, data);
                     delete entitiesList.groups;
                     delete entitiesList.customMaps;
-                    return new Promise((resolve, reject) => {
+                    return new Promise<IImportData>((resolve, reject) => {
                         let requestEntities = Object.keys(requests),
                             requestsArray = requestEntities.reduce((list, type) => list.concat(requests[type]), []);
                         if (!requestEntities.length) {
@@ -297,7 +276,7 @@ class Addin {
                                         }
                                     });
                                     return result;
-                                }, {});
+                                }, {} as IImportData);
                                 // Remove built-in security groups
                                 exportedData.securityGroups && (exportedData.securityGroups = exportedData.securityGroups.reduce((result, group) => {
                                     group.id.indexOf("Group") === -1 && result.push(group);
@@ -313,55 +292,93 @@ class Addin {
                                     } else {
                                         resolve(data);
                                     }
-                                });
+                                }, reject);
                             }, reject);
                     });
                 });
             };
-        return new Promise((resolve, reject) => {
+        return new Promise<IImportData>((resolve, reject) => {
             return getData(dependencies).then(resolve).catch(reject);
         });
-    };
+    }
 
-    private abortCurrentTask (): void {
+    private abortCurrentTask () {
         this.toggleWaiting();
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
-    };
+    }
 
-    private toggleExportButton (isDisabled: boolean): void {
+    private toggleExportButton (isDisabled: boolean) {
         (<HTMLInputElement>this.exportBtn).disabled = isDisabled;
-    };
+    }
 
-    private toggleWaiting = (isStart: boolean = false): void => {
-        if (isStart === false) {
-            this.toggleExportButton(false);
-            this.waiting.stop();
-        } else {
+    private readonly toggleWaiting = (isStart = false) => {
+        if (isStart) {
             this.toggleExportButton(true);
             this.waiting.start(document.getElementById("addinContainer").parentElement, 9999);
+        } else {
+            this.toggleExportButton(false);
+            this.waiting.stop();
         }
-    };
+    }
 
-    public render (): void {
-        let hasItemsMessageTemplate: string = document.getElementById("hasItemsMessageTemplate").innerHTML,
-            mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
+    private showEntityMessage (block: HTMLElement, qty: number, entityName: string) {
+        let blockEl = block.querySelector(".description");
+        if (qty) {
+            qty > 1 && (entityName += "s");
+            let hasItemsMessageTemplate = document.getElementById("hasItemsMessageTemplate").innerHTML;
+            blockEl.innerHTML = hasItemsMessageTemplate.replace("{quantity}", qty.toString()).replace("{entity}", entityName);
+        } else {
+            blockEl.innerHTML = `You have <span class="bold">not configured any ${ entityName }s</span>.`;
+        }
+    }
+
+    private readonly toggleThisAddinIncluded = (e: Event) => {
+        let isChecked = !!e.target && !!(<HTMLInputElement>e.target).checked;
+        let addinsBlock: HTMLElement = document.getElementById("exportedAddins");
+        let addinsData = this.miscBuilder.getAddinsData(!isChecked);
+        this.showEntityMessage(addinsBlock, addinsData.length, "addin");
+        this.data.misc.addins = addinsData;
+    }
+
+    constructor (api) {
+        this.api = api;
+        this.groupsBuilder = new GroupsBuilder(api);
+        this.securityClearancesBuilder = new SecurityClearancesBuilder(api);
+        this.reportsBuilder = new ReportsBuilder(api);
+        this.rulesBuilder = new RulesBuilder(api);
+        this.distributionListsBuilder = new DistributionListsBuilder(api);
+        this.miscBuilder = new MiscBuilder(api);
+        this.waiting = new Waiting();
+    }
+
+    exportData = () => {
+        this.toggleWaiting(true);
+        return this.reportsBuilder.getData().then((reportsData) => {
+            this.data.reports = reportsData;
+            console.log(this.data);
+            downloadDataAsFile(JSON.stringify(this.data), "export.json");
+        }).catch((e) => {
+            alert("Can't export data.\nPlease try again later.");
+            console.error(e);
+        }).finally(() => this.toggleWaiting());
+    }
+
+    render () {
+        let mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
             groupsBlock: HTMLElement = document.getElementById("exportedGroups"),
             securityClearancesBlock: HTMLElement = document.getElementById("exportedSecurityClearances"),
             rulesBlock: HTMLElement = document.getElementById("exportedRules"),
             reportsBlock: HTMLElement = document.getElementById("exportedReports"),
             dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards"),
             addinsBlock: HTMLElement = document.getElementById("exportedAddins"),
-            mapBlockDescription: HTMLElement = <HTMLElement>document.querySelector("#exportedMap > .description"),
-            showEntityMessage = (block: HTMLElement, qty: number, entityName: string): void => {
-                if (qty) {
-                    qty > 1 && (entityName += "s");
-                    block.querySelector(".description").innerHTML = hasItemsMessageTemplate.replace("{quantity}", <any>qty).replace("{entity}", entityName);
-                }
-            };
+            thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
+            thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
+            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description");
         this.exportBtn.addEventListener("click", this.exportData, false);
+        thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
-        together([
+        return together([
             this.groupsBuilder.fetch(),
             this.securityClearancesBuilder.fetch(),
             this.reportsBuilder.fetch(),
@@ -389,21 +406,22 @@ class Addin {
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
-            showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
-            showEntityMessage(securityClearancesBlock, this.data.securityGroups.length, "security clearance");
-            showEntityMessage(rulesBlock, this.data.rules.length, "rule");
-            showEntityMessage(reportsBlock, this.reportsBuilder.getCustomizedReportsQty(), "report");
-            showEntityMessage(dashboardsBlock, this.reportsBuilder.getDashboardsQty(), "dashboard");
+            this.showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
+            this.showEntityMessage(securityClearancesBlock, this.data.securityGroups.length, "security clearance");
+            this.showEntityMessage(rulesBlock, this.data.rules.length, "rule");
+            this.showEntityMessage(reportsBlock, this.reportsBuilder.getCustomizedReportsQty(), "report");
+            this.showEntityMessage(dashboardsBlock, this.reportsBuilder.getDashboardsQty(), "dashboard");
             mapProvider && (mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider));
-            showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
+            this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
+            this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
             console.log(this.data);
         }).catch((e) => {
             console.error(e);
             alert("Can't get config to export");
         }).finally(() => this.toggleWaiting());
-    };
+    }
 
-    public unload () {
+    unload () {
         this.abortCurrentTask();
         this.groupsBuilder.unload();
         this.securityClearancesBuilder.unload();
@@ -412,7 +430,7 @@ class Addin {
         this.distributionListsBuilder.unload();
         this.miscBuilder.unload();
         this.exportBtn.removeEventListener("click", this.exportData, false);
-    };
+    }
 }
 
 geotab.addin.registrationConfig = function () {

@@ -98,7 +98,7 @@ export function entityToDictionary(entities: any[], entityCallback?: (entity: an
     return o;
 }
 
-export function sortArrayOfEntities(entities: any[], sortingFields: [ISortProperty]): any[] {
+export function sortArrayOfEntities(entities: any[], sortingFields: ISortProperty[]): any[] {
     let comparator = (prevItem, nextItem, properties: any[], index = 0) => {
         if (properties.length <= index) {
             return 0;

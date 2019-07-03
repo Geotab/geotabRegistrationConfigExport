@@ -1,4 +1,4 @@
-import {entityToDictionary} from "./utils";
+import { entityToDictionary } from "./utils";
 
 type TMapProviderType = "default" | "additional" | "custom";
 
@@ -13,28 +13,24 @@ export interface IMiscData {
 }
 
 export class MiscBuilder {
-    private api;
+    private readonly api;
     private customMapProviders;
     private currentTask;
     private currentUser;
     private isUnsignedAddinsAllowed;
-    private addins;
-    private defaultMapProviders = {
+    private addins: string[];
+    private readonly defaultMapProviders = {
         GoogleMaps: "Google Maps",
         Here: "HERE Maps",
         MapBox: "MapBox"
     };
 
-    constructor(api) {
-        this.api = api;
-    }
-
-    private abortCurrentTask (): void {
+    private abortCurrentTask () {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
-    };
+    }
 
-    private getAllowedAddins (allAddins: string[]): string[] {
+    private getAllowedAddins (allAddins: string[]) {
         return allAddins.filter(addin => {
             let addinConfig = JSON.parse(addin);
             return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
@@ -42,9 +38,17 @@ export class MiscBuilder {
                 return url && url.indexOf("\/\/") > -1;
             });
         });
-    };
+    }
 
-    public fetch (): Promise<IMiscData> {
+    private isCurrentAddin (addin: string) {
+        return addin.indexOf("Registration config") > -1;
+    }
+
+    constructor(api) {
+        this.api = api;
+    }
+
+    fetch (): Promise<IMiscData> {
         this.abortCurrentTask();
         this.currentTask = new Promise((resolve, reject) => {
             this.api.getSession((sessionData) => {
@@ -57,7 +61,7 @@ export class MiscBuilder {
                             }
                         }],
                         ["Get", {
-                            typeName: "SystemSettings",
+                            typeName: "SystemSettings"
                         }]
                     ], resolve, reject);
             });
@@ -74,7 +78,7 @@ export class MiscBuilder {
             return {
                 mapProvider: {
                     value: mapProviderId,
-                    type: this.getMapProviderType(mapProviderId),
+                    type: this.getMapProviderType(mapProviderId)
                 },
                 currentUser: this.currentUser,
                 isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed,
@@ -82,21 +86,29 @@ export class MiscBuilder {
             };
         });
         return this.currentTask;
-    };
+    }
 
-    public getMapProviderType (mapProviderId: string): TMapProviderType {
+    getMapProviderType (mapProviderId: string): TMapProviderType {
         return this.defaultMapProviders[mapProviderId] ? "default" : "custom";
-    };
+    }
 
-    public getMapProviderName (mapProviderId: string): string {
+    getMapProviderName (mapProviderId: string): string {
         return mapProviderId && (this.defaultMapProviders[mapProviderId] || (this.customMapProviders[mapProviderId] && this.customMapProviders[mapProviderId].name) || mapProviderId);
-    };
+    }
 
-    public getMapProviderData (mapProviderId: string): any {
+    getMapProviderData (mapProviderId: string) {
         return mapProviderId && this.customMapProviders[mapProviderId];
-    };
+    }
 
-    public unload (): void {
+    isThisAddinIncluded () {
+        return this.addins.some(this.isCurrentAddin);
+    }
+
+    getAddinsData (includeThisAddin = true) {
+        return !includeThisAddin ? this.addins.filter(addin => !this.isCurrentAddin(addin)) : this.addins;
+    }
+
+    unload (): void {
         this.abortCurrentTask();
-    };
+    }
 }

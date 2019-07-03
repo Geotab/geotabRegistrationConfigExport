@@ -1,5 +1,5 @@
 /// <reference path="../bluebird.d.ts"/>
-import {sortArrayOfEntities, entityToDictionary, mergeUnique} from "./utils";
+import { sortArrayOfEntities, entityToDictionary, mergeUnique } from "./utils";
 
 interface IRule {
     id: string;
@@ -22,31 +22,31 @@ export interface IRuleDependencies {
 const APPLICATION_RULE_ID = "RuleApplicationExceptionId";
 
 export default class RulesBuilder {
-    private api;
+    private readonly api;
     private currentTask;
     private combinedRules;
     private structuredRules;
 
-    constructor(api) {
-        this.api = api;
-    }
-
     private getRules (): Promise<any> {
         return new Promise((resolve, reject) => {
             this.api.call("Get", {
-                "typeName": "Rule",
+                "typeName": "Rule"
             }, resolve, reject);
         });
-    };
+    }
 
     private structureRules (rules) {
         return sortArrayOfEntities(rules, [["baseType", "desc"], "name"]);
-    };
+    }
 
     private abortCurrentTask (): void {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
-    };
+    }
+
+    constructor(api) {
+        this.api = api;
+    }
 
     public getDependencies (rules): IRuleDependencies {
         let dependencies = {
@@ -94,6 +94,8 @@ export default class RulesBuilder {
                             type = "diagnostics";
                         }
                         break;
+                    default:
+                        break;
                 }
                 id && type && dependencies[type].indexOf(id) === -1 && dependencies[type].push(id);
             },
@@ -113,7 +115,7 @@ export default class RulesBuilder {
             dependencies = checkConditions(rule.condition, dependencies);
             return dependencies;
         }, dependencies);
-    };
+    }
 
     public fetch(): Promise<any> {
         this.abortCurrentTask();
@@ -129,13 +131,13 @@ export default class RulesBuilder {
                 this.currentTask = null;
             });
         return this.currentTask;
-    };
+    }
 
     public getRulesData (rulesIds: string[]): IRule[] {
         return rulesIds.map(ruleId => this.combinedRules[ruleId]);
-    };
+    }
 
     public unload (): void {
         this.abortCurrentTask();
-    };
+    }
 }

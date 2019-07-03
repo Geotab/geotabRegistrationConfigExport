@@ -29,3 +29,15 @@
 .bold {
     font-weight: bold;
 }
+
+.description {
+    margin: 10px 0;
+}
+
+#includeThisAddin input {
+    width: auto;
+}
+
+.hidden {
+    display: none;
+}
