@@ -36,6 +36,7 @@ export class MiscBuilder {
             return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
                 let url = item.url;
                 return url && url.indexOf("\/\/") > -1;
+                
             });
         });
     }
