@@ -30,6 +30,7 @@ export class MiscBuilder {
         this.currentTask = null;
     }
 
+    //todo: problem code...is this necessary?
     private getAllowedAddins (allAddins: string[]) {
         return allAddins.filter(addin => {
             let addinConfig = JSON.parse(addin);
