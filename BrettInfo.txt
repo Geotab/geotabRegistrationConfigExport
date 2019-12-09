@@ -1,0 +1,5 @@
+Development with ts
+----------------------
+cd _dev
+npm run watch    - this will auto compile the .ts files to the root addin.js
+

@@ -36,8 +36,8 @@ export class MiscBuilder {
             let addinConfig = JSON.parse(addin);
             return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
                 let url = item.url;
+                console.log('here...');
                 return url && url.indexOf("\/\/") > -1;
-                
             });
         });
     }
@@ -76,7 +76,9 @@ export class MiscBuilder {
             this.currentUser = currentUser;
             this.customMapProviders = entityToDictionary(systemSettings.customWebMapProviderList);
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
-            this.addins = this.getAllowedAddins(systemSettings.customerPages);
+            // removed by Brett to include single line addin structures
+            // this.addins = this.getAllowedAddins(systemSettings.customerPages);
+            this.addins = systemSettings.customerPages;
             return {
                 mapProvider: {
                     value: mapProviderId,
