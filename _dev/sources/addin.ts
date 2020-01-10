@@ -414,6 +414,7 @@ class Addin {
             mapProvider && (mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider));
             this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
             this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
+            //this displays all the data/objects in the console
             console.log(this.data);
         }).catch((e) => {
             console.error(e);
