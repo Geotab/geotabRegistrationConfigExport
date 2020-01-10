@@ -408,6 +408,7 @@ class Addin {
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
+            this.data.zones.length
             this.showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
             this.showEntityMessage(securityClearancesBlock, this.data.securityGroups.length, "security clearance");
             this.showEntityMessage(rulesBlock, this.data.rules.length, "rule");
