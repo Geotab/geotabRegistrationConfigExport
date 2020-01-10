@@ -322,6 +322,7 @@ class Addin {
         }
     }
 
+    //Brett - displays the output on the page
     private showEntityMessage (block: HTMLElement, qty: number, entityName: string) {
         let blockEl = block.querySelector(".description");
         if (qty) {
