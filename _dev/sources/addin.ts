@@ -352,6 +352,7 @@ class Addin {
         this.waiting = new Waiting();
     }
 
+    //Brett: exports the data
     exportData = () => {
         this.toggleWaiting(true);
         return this.reportsBuilder.getData().then((reportsData) => {
