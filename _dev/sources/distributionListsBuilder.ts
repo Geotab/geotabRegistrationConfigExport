@@ -1,6 +1,7 @@
 /// <reference path="../bluebird.d.ts"/>
 import {entityToDictionary, mergeUnique} from "./utils";
 
+//A distribution list links a set of Rule(s) to a set of Recipient(s). When a Rule is violated each related Recipient will receive a notification of the kind defined by its RecipientType.
 interface IDistributionList {
     id: string;
     name: string;
@@ -25,6 +26,7 @@ export default class DistributionListsBuilder {
         this.api = api;
     }
 
+    //A distribution list links a set of Rule(s) to a set of Recipient(s). When a Rule is violated each related Recipient will receive a notification of the kind defined by its RecipientType.
     private getDistributionListsData (): Promise<any> {
         return new Promise((resolve, reject) => {
             this.api.multiCall([
