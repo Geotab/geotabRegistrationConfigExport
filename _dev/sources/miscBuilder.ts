@@ -50,6 +50,7 @@ export class MiscBuilder {
         this.api = api;
     }
 
+    //fills the Misc builder (system settings) with the relevant information
     fetch (): Promise<IMiscData> {
         this.abortCurrentTask();
         this.currentTask = new Promise((resolve, reject) => {

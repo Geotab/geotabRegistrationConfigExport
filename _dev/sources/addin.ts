@@ -334,6 +334,7 @@ class Addin {
         }
     }
 
+    //if the includeThisAddin checkbox is changed we enter here
     private readonly toggleThisAddinIncluded = (e: Event) => {
         let isChecked = !!e.target && !!(<HTMLInputElement>e.target).checked;
         let addinsBlock: HTMLElement = document.getElementById("exportedAddins");
@@ -342,6 +343,7 @@ class Addin {
         this.data.misc.addins = addinsData;
     }
 
+    //initialize addin 
     constructor (api) {
         this.api = api;
         this.groupsBuilder = new GroupsBuilder(api);
@@ -367,6 +369,7 @@ class Addin {
     }
 
     render () {
+        //wire up the dom
         let mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
             groupsBlock: HTMLElement = document.getElementById("exportedGroups"),
             securityClearancesBlock: HTMLElement = document.getElementById("exportedSecurityClearances"),
@@ -377,7 +380,9 @@ class Addin {
             thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
             thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description");
+        //wire up the export button event
         this.exportBtn.addEventListener("click", this.exportData, false);
+        //wire up the includeThisAddin checkbox event
         thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
         return together([
@@ -386,6 +391,7 @@ class Addin {
             this.reportsBuilder.fetch(),
             this.rulesBuilder.fetch(),
             this.distributionListsBuilder.fetch(),
+            //misc = system settings
             this.miscBuilder.fetch()
         ]).then((results) => {
             let reportsDependencies: IDependencies,
