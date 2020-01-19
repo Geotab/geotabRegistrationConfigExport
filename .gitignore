@@ -36,3 +36,4 @@ dist/
 firebase.json
 hosting.*.cache
 
+export_example.json
