@@ -6,6 +6,7 @@ import DistributionListsBuilder from "./distributionListsBuilder";
 import {IMiscData, MiscBuilder} from "./miscBuilder";
 import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise} from "./utils";
 import Waiting from "./waiting";
+import {UserBuilder} from "./userBuilder";
 
 interface Geotab {
     addin: {
@@ -57,9 +58,12 @@ class Addin {
     private readonly rulesBuilder: RulesBuilder;
     private readonly distributionListsBuilder: DistributionListsBuilder;
     private readonly miscBuilder: MiscBuilder;
+    private readonly userBuilder: UserBuilder;
     private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
     private readonly waiting: Waiting;
     private currentTask;
+    //Brett test
+    private allUsers: [];
     private readonly data: IImportData = {
         groups: [],
         reports: [],
@@ -352,6 +356,7 @@ class Addin {
         this.rulesBuilder = new RulesBuilder(api);
         this.distributionListsBuilder = new DistributionListsBuilder(api);
         this.miscBuilder = new MiscBuilder(api);
+        this.userBuilder = new UserBuilder(api);
         this.waiting = new Waiting();
     }
 
@@ -395,7 +400,8 @@ class Addin {
             this.rulesBuilder.fetch(),
             this.distributionListsBuilder.fetch(),
             //misc = system settings
-            this.miscBuilder.fetch()
+            this.miscBuilder.fetch(),
+            this.userBuilder.fetch()
         ]).then((results) => {
             let reportsDependencies: IDependencies,
                 rulesDependencies: IDependencies,
@@ -414,9 +420,14 @@ class Addin {
             rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
             distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
             dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
+            this.allUsers = results[6];
             //this is where the users are added
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
+            if(true){
+                //sets exported users equal to all database users
+                this.data.users = this.allUsers;
+            }
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
             this.data.zones.length
             this.showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
