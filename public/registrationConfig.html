@@ -9,6 +9,7 @@
 	<div id="addinContainer">
         <div class="geotabToolbar">
             <button id="exportButton" class="geotabButton">Export</button>
+            <button id="submitChangesButton" class="geotabButton">Save Changes</button>
         </div>
         <div class="geotabPageHeader">
             <h1 class="geotabPageName">Export registration config</h1>
@@ -45,6 +46,11 @@
                     <input type="checkbox" value="includeThisAddin"></input>
                     <span class="description">Do not include this add-in into config</span>
                 </label>
+            </div>
+            <div id="exportedUsers">
+                <h2>Users</h2>
+                <div class="description">You have <span class="bold">not configured any Customized reports</span>.</div>
+                <input id="export_all_users_checkbox" value="export_all_users" type="checkbox" checked></input>
             </div>
         </div>
 	</div>

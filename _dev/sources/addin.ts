@@ -60,6 +60,7 @@ class Addin {
     private readonly miscBuilder: MiscBuilder;
     private readonly userBuilder: UserBuilder;
     private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
+    private readonly submitChangesBtn: HTMLElement = document.getElementById("submitChangesButton");
     private readonly waiting: Waiting;
     private currentTask;
     //Brett test
@@ -373,7 +374,12 @@ class Addin {
         }).finally(() => this.toggleWaiting());
     }
 
+    submitChanges = () => {
+        this.render();
+    }
+
     render () {
+        this.data.users = [];
         //wire up the dom
         let mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
             groupsBlock: HTMLElement = document.getElementById("exportedGroups"),
@@ -384,9 +390,11 @@ class Addin {
             addinsBlock: HTMLElement = document.getElementById("exportedAddins"),
             thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
             thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
-            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description");
+            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
+            exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement;
         //wire up the export button event
         this.exportBtn.addEventListener("click", this.exportData, false);
+        this.submitChangesBtn.addEventListener("click", this.submitChanges, false);
         //wire up the includeThisAddin checkbox event
         thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
@@ -424,7 +432,8 @@ class Addin {
             //this is where the users are added
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
-            if(true){
+            debugger;
+            if(exportAllUsersCheckbox.checked==true){
                 //sets exported users equal to all database users
                 this.data.users = this.allUsers;
             }
@@ -455,6 +464,7 @@ class Addin {
         this.distributionListsBuilder.unload();
         this.miscBuilder.unload();
         this.exportBtn.removeEventListener("click", this.exportData, false);
+        this.submitChangesBtn.removeEventListener("click", this.submitChanges, false);
     }
 }
 
