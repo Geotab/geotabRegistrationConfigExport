@@ -28,6 +28,7 @@ bower_components/
 *.css.map
 build/
 dist/
+public/
 
 # Firebase #
 ############
