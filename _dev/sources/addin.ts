@@ -386,8 +386,11 @@ class Addin {
         thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
         return together([
+            //loads the groups. This is where users are added if they are linked to a group
             this.groupsBuilder.fetch(),
+            //loads the security groups (security clearance in user admin in MyG)
             this.securityClearancesBuilder.fetch(),
+            //report loader...seems obsolete to me
             this.reportsBuilder.fetch(),
             this.rulesBuilder.fetch(),
             this.distributionListsBuilder.fetch(),
@@ -411,6 +414,7 @@ class Addin {
             rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
             distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
             dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
+            //this is where the users are added
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
