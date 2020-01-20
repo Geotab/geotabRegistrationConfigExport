@@ -380,6 +380,7 @@ class Addin {
 
     render () {
         this.data.users = [];
+        this.setAddinsToNull();
         //wire up the dom
         let mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
             groupsBlock: HTMLElement = document.getElementById("exportedGroups"),
@@ -388,8 +389,9 @@ class Addin {
             reportsBlock: HTMLElement = document.getElementById("exportedReports"),
             dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards"),
             addinsBlock: HTMLElement = document.getElementById("exportedAddins"),
-            thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
-            thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
+            exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement,
+            // thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
+            // thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
             usersBlock: HTMLElement = document.getElementById("exportedUsers"),
             exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement;
@@ -397,7 +399,7 @@ class Addin {
         this.exportBtn.addEventListener("click", this.exportData, false);
         this.submitChangesBtn.addEventListener("click", this.submitChanges, false);
         //wire up the includeThisAddin checkbox event
-        thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
+        // thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
         return together([
             //loads the groups. This is where users are added if they are linked to a group
@@ -438,6 +440,10 @@ class Addin {
                 //sets exported users equal to all database users
                 this.data.users = this.allUsers;
             }
+            if(exportAllAddinsCheckbox.checked==false){
+                //sets exported addins equal to none/empty array
+                this.setAddinsToNull();
+            }
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
             this.data.zones.length
             this.showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
@@ -447,7 +453,7 @@ class Addin {
             this.showEntityMessage(dashboardsBlock, this.reportsBuilder.getDashboardsQty(), "dashboard");
             mapProvider && (mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider));
             this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
-            this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
+            // this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
             this.showEntityMessage(usersBlock, this.data.users.length, "user");
             //this displays all the data/objects in the console
             console.log(this.data);
@@ -455,6 +461,12 @@ class Addin {
             console.error(e);
             alert("Can't get config to export");
         }).finally(() => this.toggleWaiting());
+    }
+
+    private setAddinsToNull() {
+        if ((this.data.misc != null) || (this.data.misc != undefined)) {
+            this.data.misc.addins = [];
+        }
     }
 
     unload () {
