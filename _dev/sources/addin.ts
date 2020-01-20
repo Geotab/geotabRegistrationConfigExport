@@ -391,6 +391,7 @@ class Addin {
             thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
             thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
+            usersBlock: HTMLElement = document.getElementById("exportedUsers"),
             exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement;
         //wire up the export button event
         this.exportBtn.addEventListener("click", this.exportData, false);
@@ -432,7 +433,7 @@ class Addin {
             //this is where the users are added
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
-            debugger;
+            // debugger;
             if(exportAllUsersCheckbox.checked==true){
                 //sets exported users equal to all database users
                 this.data.users = this.allUsers;
@@ -447,6 +448,7 @@ class Addin {
             mapProvider && (mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider));
             this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
             this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
+            this.showEntityMessage(usersBlock, this.data.users.length, "user");
             //this displays all the data/objects in the console
             console.log(this.data);
         }).catch((e) => {

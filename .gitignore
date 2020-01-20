@@ -38,3 +38,5 @@ firebase.json
 hosting.*.cache
 
 export_example.json
+_dev/package-lock.json
+public/addin.js
