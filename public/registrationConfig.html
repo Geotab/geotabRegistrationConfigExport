@@ -7,12 +7,18 @@
     </head>
 <body>
 	<div id="addinContainer">
+        <div class="geotabPageHeader">
+            <h1 class="geotabPageName">Export registration config (beta)</h1>
+        </div>
         <div class="geotabToolbar">
             <button id="exportButton" class="geotabButton">Export</button>
             <button id="submitChangesButton" class="geotabButton">Save Changes</button>
         </div>
-        <div class="geotabPageHeader">
-            <h1 class="geotabPageName">Export registration config</h1>
+        <div class="geotabSecondaryFill">
+            <p class="infoText"><b>Export:</b> executes the export and generates the <b>export.json</b> file.</p>
+            <p class="infoText"><b>Save Changes:</b> updates the export data to include any changes since the previous update.</p>
+            <p class="infoText">The text below each group name indicates the current export settings.</p>
+            <p class="infoText"><b>Note:</b> The checkbox selection changes will only be taken into account after the "Save Changes" button has been hit and not when the "Export" button has been hit.</p>
         </div>
         <div id="exporedData">
             <div id="exportedGroups">
@@ -52,7 +58,8 @@
                 <div class="description">You have <span class="bold">not exported any users</span>.</div>
                 <label id="exportAllUsers">
                     <input id="export_all_users_checkbox" value="export_all_users" type="checkbox" class="checkboxStyle" checked></input>
-                    <span class="infoText">Export all users (NOTE: Uncheck this box if you do not want to export all users)</span>
+                    <p class="infoText">Export all users</p>
+                    <p><b>Note:</b> Uncheck this box if you do not want to export all users. If unchecked only users linked (with dependencies) to groups will be exported...</p>
                 </label>
             </div>
         </div>
