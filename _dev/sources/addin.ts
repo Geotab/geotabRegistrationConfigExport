@@ -7,6 +7,7 @@ import {IMiscData, MiscBuilder} from "./miscBuilder";
 import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise} from "./utils";
 import Waiting from "./waiting";
 import {UserBuilder} from "./userBuilder";
+import {ZoneBuilder} from "./zoneBuilder";
 
 interface Geotab {
     addin: {
@@ -59,12 +60,14 @@ class Addin {
     private readonly distributionListsBuilder: DistributionListsBuilder;
     private readonly miscBuilder: MiscBuilder;
     private readonly userBuilder: UserBuilder;
+    private readonly zoneBuilder: ZoneBuilder;
     private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
     private readonly submitChangesBtn: HTMLElement = document.getElementById("submitChangesButton");
     private readonly waiting: Waiting;
     private currentTask;
-    //Brett test
-    private allUsers: [];
+    //temporary placeholders for the objects indicated
+    private tempUsers: [];
+    private tempZones
     private readonly data: IImportData = {
         groups: [],
         reports: [],
@@ -358,6 +361,7 @@ class Addin {
         this.distributionListsBuilder = new DistributionListsBuilder(api);
         this.miscBuilder = new MiscBuilder(api);
         this.userBuilder = new UserBuilder(api);
+        this.zoneBuilder = new ZoneBuilder(api);
         this.waiting = new Waiting();
     }
 
@@ -380,6 +384,7 @@ class Addin {
 
     render () {
         this.data.users = [];
+        this.data.zones = [];
         this.setAddinsToNull();
         //wire up the dom
         let mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
@@ -394,7 +399,9 @@ class Addin {
             // thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
             usersBlock: HTMLElement = document.getElementById("exportedUsers"),
-            exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement;
+            exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement,
+            zonesBlock: HTMLElement = document.getElementById("exportedZones"),
+            exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
         //wire up the export button event
         this.exportBtn.addEventListener("click", this.exportData, false);
         this.submitChangesBtn.addEventListener("click", this.submitChanges, false);
@@ -412,7 +419,8 @@ class Addin {
             this.distributionListsBuilder.fetch(),
             //misc = system settings
             this.miscBuilder.fetch(),
-            this.userBuilder.fetch()
+            this.userBuilder.fetch(),
+            this.zoneBuilder.fetch()
         ]).then((results) => {
             let reportsDependencies: IDependencies,
                 rulesDependencies: IDependencies,
@@ -431,14 +439,19 @@ class Addin {
             rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
             distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
             dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
-            this.allUsers = results[6];
-            //this is where the users are added
+            this.tempUsers = results[6];
+            this.tempZones = results[7];
+            //this is where the users & zones are added
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
             // debugger;
             if(exportAllUsersCheckbox.checked==true){
                 //sets exported users equal to all database users
-                this.data.users = this.allUsers;
+                this.data.users = this.tempUsers;
+            }
+            if(exportAllZonesCheckbox.checked==true){
+                //sets exported users equal to all database users
+                this.data.zones = this.tempZones;
             }
             if(exportAllAddinsCheckbox.checked==false){
                 //sets exported addins equal to none/empty array
@@ -455,6 +468,7 @@ class Addin {
             this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
             // this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
             this.showEntityMessage(usersBlock, this.data.users.length, "user");
+            this.showEntityMessage(zonesBlock, this.data.zones.length, "zone");
             //this displays all the data/objects in the console
             console.log(this.data);
         }).catch((e) => {
