@@ -22,13 +22,13 @@
 
 # Build Systems #
 #################
-node_modules/
-bower_components/
+node_modules
+bower_components
 .sass-cache
 *.css.map
-build/
-dist/
-public/
+build
+dist
+public
 
 # Firebase #
 ############
@@ -39,4 +39,4 @@ hosting.*.cache
 
 export_example.json
 _dev/package-lock.json
-public/addin.js
+_dev/sources/bluebird.d.ts
