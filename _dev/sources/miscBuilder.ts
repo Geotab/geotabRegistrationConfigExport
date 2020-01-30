@@ -10,6 +10,8 @@ export interface IMiscData {
     currentUser: any;
     isUnsignedAddinsAllowed: boolean;
     addins: string[];
+    purgeSettings: any;
+    emailSenderFrom: string;
 }
 
 export class MiscBuilder {
@@ -24,13 +26,15 @@ export class MiscBuilder {
         Here: "HERE Maps",
         MapBox: "MapBox"
     };
+    private purgeSettings: any;
+    private emailSenderFrom: string;
 
     private abortCurrentTask () {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
     }
 
-    //todo: problem code...is this necessary?
+    //todo problem code...is this necessary?
     private getAllowedAddins (allAddins: string[]) {
         return allAddins.filter(addin => {
             let addinConfig = JSON.parse(addin);
@@ -74,6 +78,8 @@ export class MiscBuilder {
                 userMapProviderId = currentUser.defaultMapEngine,
                 defaultMapProviderId = systemSettings.mapProvider,
                 mapProviderId = this.getMapProviderType(userMapProviderId) === "custom" ? userMapProviderId : defaultMapProviderId;
+            this.purgeSettings = systemSettings.purgeSettings;
+            this.emailSenderFrom = systemSettings.emailSenderFrom;
             this.currentUser = currentUser;
             this.customMapProviders = entityToDictionary(systemSettings.customWebMapProviderList);
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
@@ -87,7 +93,9 @@ export class MiscBuilder {
                 },
                 currentUser: this.currentUser,
                 isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed,
-                addins: this.addins
+                addins: this.addins,
+                purgeSettings: this.purgeSettings,
+                emailSenderFrom: this.emailSenderFrom
             };
         });
         return this.currentTask;
