@@ -12,6 +12,7 @@ export interface IMiscData {
     addins: string[];
     purgeSettings: any;
     emailSenderFrom: string;
+    customerClassification: string;
 }
 
 export class MiscBuilder {
@@ -28,6 +29,7 @@ export class MiscBuilder {
     };
     private purgeSettings: any;
     private emailSenderFrom: string;
+    private customerClassification: string;
 
     private abortCurrentTask () {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
@@ -80,6 +82,7 @@ export class MiscBuilder {
                 mapProviderId = this.getMapProviderType(userMapProviderId) === "custom" ? userMapProviderId : defaultMapProviderId;
             this.purgeSettings = systemSettings.purgeSettings;
             this.emailSenderFrom = systemSettings.emailSenderFrom;
+            this.customerClassification = systemSettings.customerClassification;
             this.currentUser = currentUser;
             this.customMapProviders = entityToDictionary(systemSettings.customWebMapProviderList);
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
@@ -95,7 +98,8 @@ export class MiscBuilder {
                 isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed,
                 addins: this.addins,
                 purgeSettings: this.purgeSettings,
-                emailSenderFrom: this.emailSenderFrom
+                emailSenderFrom: this.emailSenderFrom,
+                customerClassification: this.customerClassification
             };
         });
         return this.currentTask;
