@@ -6,6 +6,8 @@ import DistributionListsBuilder from "./distributionListsBuilder";
 import {IMiscData, MiscBuilder} from "./miscBuilder";
 import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise} from "./utils";
 import Waiting from "./waiting";
+import {UserBuilder} from "./userBuilder";
+import {ZoneBuilder} from "./zoneBuilder";
 
 interface Geotab {
     addin: {
@@ -57,9 +59,15 @@ class Addin {
     private readonly rulesBuilder: RulesBuilder;
     private readonly distributionListsBuilder: DistributionListsBuilder;
     private readonly miscBuilder: MiscBuilder;
+    private readonly userBuilder: UserBuilder;
+    private readonly zoneBuilder: ZoneBuilder;
     private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
+    private readonly submitChangesBtn: HTMLElement = document.getElementById("submitChangesButton");
     private readonly waiting: Waiting;
     private currentTask;
+    //temporary placeholders for the objects indicated
+    private tempUsers: [];
+    private tempZones
     private readonly data: IImportData = {
         groups: [],
         reports: [],
@@ -322,6 +330,7 @@ class Addin {
         }
     }
 
+    //Brett - displays the output on the page
     private showEntityMessage (block: HTMLElement, qty: number, entityName: string) {
         let blockEl = block.querySelector(".description");
         if (qty) {
@@ -333,6 +342,7 @@ class Addin {
         }
     }
 
+    //if the includeThisAddin checkbox is changed we enter here
     private readonly toggleThisAddinIncluded = (e: Event) => {
         let isChecked = !!e.target && !!(<HTMLInputElement>e.target).checked;
         let addinsBlock: HTMLElement = document.getElementById("exportedAddins");
@@ -341,6 +351,7 @@ class Addin {
         this.data.misc.addins = addinsData;
     }
 
+    //initialize addin 
     constructor (api) {
         this.api = api;
         this.groupsBuilder = new GroupsBuilder(api);
@@ -349,9 +360,12 @@ class Addin {
         this.rulesBuilder = new RulesBuilder(api);
         this.distributionListsBuilder = new DistributionListsBuilder(api);
         this.miscBuilder = new MiscBuilder(api);
+        this.userBuilder = new UserBuilder(api);
+        this.zoneBuilder = new ZoneBuilder(api);
         this.waiting = new Waiting();
     }
 
+    //Brett: exports the data
     exportData = () => {
         this.toggleWaiting(true);
         return this.reportsBuilder.getData().then((reportsData) => {
@@ -364,7 +378,15 @@ class Addin {
         }).finally(() => this.toggleWaiting());
     }
 
+    submitChanges = () => {
+        this.render();
+    }
+
     render () {
+        this.data.users = [];
+        this.data.zones = [];
+        this.setAddinsToNull();
+        //wire up the dom
         let mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
             groupsBlock: HTMLElement = document.getElementById("exportedGroups"),
             securityClearancesBlock: HTMLElement = document.getElementById("exportedSecurityClearances"),
@@ -372,19 +394,33 @@ class Addin {
             reportsBlock: HTMLElement = document.getElementById("exportedReports"),
             dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards"),
             addinsBlock: HTMLElement = document.getElementById("exportedAddins"),
-            thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
-            thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
-            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description");
+            exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement,
+            // thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
+            // thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
+            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
+            usersBlock: HTMLElement = document.getElementById("exportedUsers"),
+            exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement,
+            zonesBlock: HTMLElement = document.getElementById("exportedZones"),
+            exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
+        //wire up the export button event
         this.exportBtn.addEventListener("click", this.exportData, false);
-        thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
+        this.submitChangesBtn.addEventListener("click", this.submitChanges, false);
+        //wire up the includeThisAddin checkbox event
+        // thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
         return together([
+            //loads the groups. This is where users are added if they are linked to a group
             this.groupsBuilder.fetch(),
+            //loads the security groups (security clearance in user admin in MyG)
             this.securityClearancesBuilder.fetch(),
+            //report loader...seems obsolete to me
             this.reportsBuilder.fetch(),
             this.rulesBuilder.fetch(),
             this.distributionListsBuilder.fetch(),
-            this.miscBuilder.fetch()
+            //misc = system settings
+            this.miscBuilder.fetch(),
+            this.userBuilder.fetch(),
+            this.zoneBuilder.fetch()
         ]).then((results) => {
             let reportsDependencies: IDependencies,
                 rulesDependencies: IDependencies,
@@ -403,9 +439,26 @@ class Addin {
             rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
             distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
             dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
+            this.tempUsers = results[6];
+            this.tempZones = results[7];
+            //this is where the users & zones are added
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
+            // debugger;
+            if(exportAllUsersCheckbox.checked==true){
+                //sets exported users equal to all database users
+                this.data.users = this.tempUsers;
+            }
+            if(exportAllZonesCheckbox.checked==true){
+                //sets exported users equal to all database users
+                this.data.zones = this.tempZones;
+            }
+            if(exportAllAddinsCheckbox.checked==false){
+                //sets exported addins equal to none/empty array
+                this.setAddinsToNull();
+            }
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
+            // this.data.zones.length
             this.showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
             this.showEntityMessage(securityClearancesBlock, this.data.securityGroups.length, "security clearance");
             this.showEntityMessage(rulesBlock, this.data.rules.length, "rule");
@@ -413,12 +466,21 @@ class Addin {
             this.showEntityMessage(dashboardsBlock, this.reportsBuilder.getDashboardsQty(), "dashboard");
             mapProvider && (mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider));
             this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
-            this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
+            // this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
+            this.showEntityMessage(usersBlock, this.data.users.length, "user");
+            this.showEntityMessage(zonesBlock, this.data.zones.length, "zone");
+            //this displays all the data/objects in the console
             console.log(this.data);
         }).catch((e) => {
             console.error(e);
             alert("Can't get config to export");
         }).finally(() => this.toggleWaiting());
+    }
+
+    private setAddinsToNull() {
+        if ((this.data.misc != null) || (this.data.misc != undefined)) {
+            this.data.misc.addins = [];
+        }
     }
 
     unload () {
@@ -430,6 +492,7 @@ class Addin {
         this.distributionListsBuilder.unload();
         this.miscBuilder.unload();
         this.exportBtn.removeEventListener("click", this.exportData, false);
+        this.submitChangesBtn.removeEventListener("click", this.submitChanges, false);
     }
 }
 

@@ -52,6 +52,7 @@ export default class ReportsBuilder {
     private dashboardsLength: number;
     private allTemplates: IReportTemplate[];
 
+    //GetReportSchedules is obsolete
     private getReports (): Promise<any> {
         return new Promise((resolve, reject) => {
             this.api.multiCall([

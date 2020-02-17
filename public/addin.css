@@ -38,6 +38,14 @@
     width: auto;
 }
 
+.checkboxStyle {
+    width: auto;
+}
+
 .hidden {
     display: none;
+}
+
+.infoText {
+    margin: 10px 0;
 }
