@@ -48,6 +48,12 @@ export class MiscBuilder {
         });
     }
 
+    private removeExportAddin (allAddins: string[]) {
+        return allAddins.filter(addin => {
+            return (addin.toLowerCase().indexOf("registrationConfig".toLowerCase()) <= 0);
+        });
+    }
+
     private isCurrentAddin (addin: string) {
         return addin.indexOf("Registration config") > -1;
     }
@@ -88,7 +94,8 @@ export class MiscBuilder {
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
             // removed by Brett to include single line addin structures
             // this.addins = this.getAllowedAddins(systemSettings.customerPages);
-            this.addins = systemSettings.customerPages;
+            this.addins = this.removeExportAddin(systemSettings.customerPages);
+            // this.addins = systemSettings.customerPages;
             return {
                 mapProvider: {
                     value: mapProviderId,
