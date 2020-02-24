@@ -62,7 +62,10 @@ class Addin {
     private readonly userBuilder: UserBuilder;
     private readonly zoneBuilder: ZoneBuilder;
     private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
-    private readonly submitChangesBtn: HTMLElement = document.getElementById("submitChangesButton");
+    private readonly saveBtn: HTMLElement = document.getElementById("saveButton");
+    private readonly exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement;
+    private readonly exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement;
+    private readonly exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
     private readonly waiting: Waiting;
     private currentTask;
     //temporary placeholders for the objects indicated
@@ -378,8 +381,13 @@ class Addin {
         }).finally(() => this.toggleWaiting());
     }
 
-    submitChanges = () => {
+    saveChanges = () => {
         this.render();
+        (<HTMLInputElement>this.exportBtn).disabled = false;
+    }
+
+    checkBoxValueChanged = () => {
+        (<HTMLInputElement>this.exportBtn).disabled = true;
     }
 
     render () {
@@ -394,17 +402,20 @@ class Addin {
             reportsBlock: HTMLElement = document.getElementById("exportedReports"),
             dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards"),
             addinsBlock: HTMLElement = document.getElementById("exportedAddins"),
-            exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement,
+            // exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement,
             // thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
             // thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
             usersBlock: HTMLElement = document.getElementById("exportedUsers"),
-            exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement,
-            zonesBlock: HTMLElement = document.getElementById("exportedZones"),
-            exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
+            // exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement,
+            zonesBlock: HTMLElement = document.getElementById("exportedZones");
+            // exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
         //wire up the export button event
         this.exportBtn.addEventListener("click", this.exportData, false);
-        this.submitChangesBtn.addEventListener("click", this.submitChanges, false);
+        this.saveBtn.addEventListener("click", this.saveChanges, false);
+        this.exportAllAddinsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        this.exportAllUsersCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        this.exportAllZonesCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
         //wire up the includeThisAddin checkbox event
         // thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
@@ -445,15 +456,15 @@ class Addin {
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
             // debugger;
-            if(exportAllUsersCheckbox.checked==true){
+            if(this.exportAllUsersCheckbox.checked==true){
                 //sets exported users equal to all database users
                 this.data.users = this.tempUsers;
             }
-            if(exportAllZonesCheckbox.checked==true){
+            if(this.exportAllZonesCheckbox.checked==true){
                 //sets exported users equal to all database users
                 this.data.zones = this.tempZones;
             }
-            if(exportAllAddinsCheckbox.checked==false){
+            if(this.exportAllAddinsCheckbox.checked==false){
                 //sets exported addins equal to none/empty array
                 this.setAddinsToNull();
             }
@@ -492,7 +503,7 @@ class Addin {
         this.distributionListsBuilder.unload();
         this.miscBuilder.unload();
         this.exportBtn.removeEventListener("click", this.exportData, false);
-        this.submitChangesBtn.removeEventListener("click", this.submitChanges, false);
+        this.saveBtn.removeEventListener("click", this.saveChanges, false);
     }
 }
 

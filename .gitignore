@@ -40,3 +40,4 @@ hosting.*.cache
 export_example.json
 _dev/package-lock.json
 _dev/sources/bluebird.d.ts
+public/addin.js
