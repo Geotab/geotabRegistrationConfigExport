@@ -450,24 +450,20 @@ class Addin {
             rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
             distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
             dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
-            this.tempUsers = results[6];
-            this.tempZones = results[7];
-            //this is where the users & zones are added
-            return this.resolveDependencies(dependencies, this.data);
-        }).then(() => {
-            // debugger;
             if(this.exportAllUsersCheckbox.checked==true){
                 //sets exported users equal to all database users
-                this.data.users = this.tempUsers;
+                this.data.users = results[6];
             }
             if(this.exportAllZonesCheckbox.checked==true){
-                //sets exported users equal to all database users
-                this.data.zones = this.tempZones;
+                //sets exported zones to all database zones
+                this.data.zones = results[7];
             }
             if(this.exportAllAddinsCheckbox.checked==false){
                 //sets exported addins equal to none/empty array
                 this.setAddinsToNull();
             }
+            return this.resolveDependencies(dependencies, this.data);
+        }).then(() => {
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
             // this.data.zones.length
             this.showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
