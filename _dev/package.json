@@ -12,7 +12,7 @@
     "watch": "watchify sources/addin.ts -p tsify --debug -o ../public/addin.js -dv",
     "build": "browserify sources/addin.ts -p tsify > ../public/addin.js",
     "start": "start npm run startServer & start npm run watch",
-    "copyFiles": "copyfiles -u 2 ../public/addin.* ../public/registrationConfig.html ../../../MyGeotabDevTool/addins/DatabaseExportConfig/"
+    "copyfiles": "copyfiles -u 2 ../public/* ../public/*/*/* ../../../MyGeotabDevTool/addins/DatabaseExportConfig/"
   },
   "dependencies": {
     "browserify": "^16.2.3",
