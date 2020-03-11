@@ -37,15 +37,47 @@ export class MiscBuilder {
     }
 
     //todo problem code...is this necessary?
+    // private getAllowedAddins (allAddins: string[]) {
+    //     return allAddins.filter(addin => {
+    //         let addinConfig = JSON.parse(addin);
+    //         return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
+    //             let url = item.url;
+    //             return url && url.indexOf("\/\/") > -1;
+    //         });
+    //     });
+    // }
+
     private getAllowedAddins (allAddins: string[]) {
         return allAddins.filter(addin => {
+            //removes the current addin - registration config
+            if(this.isCurrentAddin(addin))
+            {
+                return false;
+            }
             let addinConfig = JSON.parse(addin);
-            return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
-                let url = item.url;
-                console.log('here...');
-                return url && url.indexOf("\/\/") > -1;
-            });
+            if(addinConfig.items) {
+                //Multi line addin structure check
+                return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
+                    let url = item.url;
+                    return this.isValidUrl(url);
+                });
+            }
+            else {
+                //Single line addin structure check
+                return this.isValidUrl(addinConfig.url);
+            }
         });
+    }
+
+    //Tests a URL for double slash. Accepts a url as a string as a argument.
+    //Returns true if the url contains a double slash //
+    //Returns false if the url does not contain a double slash.
+    private isValidUrl(url: string): boolean {
+        if (url && url.indexOf("\/\/") > -1)
+        {
+            return true;
+        }
+        return false;
     }
 
     private removeExportAddin (allAddins: string[]) {
@@ -55,7 +87,8 @@ export class MiscBuilder {
     }
 
     private isCurrentAddin (addin: string) {
-        return addin.indexOf("Registration config") > -1;
+        return ((addin.indexOf("Registration config") > -1)||
+        (addin.toLowerCase().indexOf("registrationConfig".toLowerCase()) > -1));
     }
 
     constructor(api) {
@@ -93,8 +126,8 @@ export class MiscBuilder {
             this.customMapProviders = entityToDictionary(systemSettings.customWebMapProviderList);
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
             // removed by Brett to include single line addin structures
-            // this.addins = this.getAllowedAddins(systemSettings.customerPages);
-            this.addins = this.removeExportAddin(systemSettings.customerPages);
+            this.addins = this.getAllowedAddins(systemSettings.customerPages);
+            //this.addins = this.removeExportAddin(systemSettings.customerPages);
             // this.addins = systemSettings.customerPages;
             return {
                 mapProvider: {
@@ -128,7 +161,7 @@ export class MiscBuilder {
         return this.addins.some(this.isCurrentAddin);
     }
 
-    getAddinsData (includeThisAddin = true) {
+    getAddinsData (includeThisAddin = false) {
         return !includeThisAddin ? this.addins.filter(addin => !this.isCurrentAddin(addin)) : this.addins;
     }
 
