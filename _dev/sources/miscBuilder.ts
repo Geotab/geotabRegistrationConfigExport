@@ -13,6 +13,9 @@ export interface IMiscData {
     purgeSettings: any;
     emailSenderFrom: string;
     customerClassification: string;
+    isMarketplacePurchasesAllowed: boolean;
+    isResellerAutoLoginAllowed: boolean;
+    isThirdPartyMarketplaceAppsAllowed: boolean;
 }
 
 export class MiscBuilder {
@@ -30,6 +33,9 @@ export class MiscBuilder {
     private purgeSettings: any;
     private emailSenderFrom: string;
     private customerClassification: string;
+    private isMarketplacePurchasesAllowed;
+    private isResellerAutoLoginAllowed;
+    private isThirdPartyMarketplaceAppsAllowed;
 
     private abortCurrentTask () {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
@@ -125,10 +131,10 @@ export class MiscBuilder {
             this.currentUser = currentUser;
             this.customMapProviders = entityToDictionary(systemSettings.customWebMapProviderList);
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
-            // removed by Brett to include single line addin structures
             this.addins = this.getAllowedAddins(systemSettings.customerPages);
-            //this.addins = this.removeExportAddin(systemSettings.customerPages);
-            // this.addins = systemSettings.customerPages;
+            this.isMarketplacePurchasesAllowed = systemSettings.allowMarketplacePurchases;
+            this.isResellerAutoLoginAllowed = systemSettings.allowResellerAutoLogin;
+            this.isThirdPartyMarketplaceAppsAllowed = systemSettings.allowThirdPartyMarketplaceApps;
             return {
                 mapProvider: {
                     value: mapProviderId,
@@ -139,7 +145,10 @@ export class MiscBuilder {
                 addins: this.addins,
                 purgeSettings: this.purgeSettings,
                 emailSenderFrom: this.emailSenderFrom,
-                customerClassification: this.customerClassification
+                customerClassification: this.customerClassification,
+                isMarketplacePurchasesAllowed: this.isMarketplacePurchasesAllowed,
+                isResellerAutoLoginAllowed: this.isResellerAutoLoginAllowed,
+                isThirdPartyMarketplaceAppsAllowed: this.isThirdPartyMarketplaceAppsAllowed
             };
         });
         return this.currentTask;
