@@ -500,6 +500,9 @@ class Addin {
         this.miscBuilder.unload();
         this.exportBtn.removeEventListener("click", this.exportData, false);
         this.saveBtn.removeEventListener("click", this.saveChanges, false);
+        this.exportAllAddinsCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
+        this.exportAllUsersCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
+        this.exportAllZonesCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
     }
 }
 
