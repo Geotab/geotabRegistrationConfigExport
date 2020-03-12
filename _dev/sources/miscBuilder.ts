@@ -33,9 +33,9 @@ export class MiscBuilder {
     private purgeSettings: any;
     private emailSenderFrom: string;
     private customerClassification: string;
-    private isMarketplacePurchasesAllowed;
-    private isResellerAutoLoginAllowed;
-    private isThirdPartyMarketplaceAppsAllowed;
+    private isMarketplacePurchasesAllowed: boolean;
+    private isResellerAutoLoginAllowed: boolean;
+    private isThirdPartyMarketplaceAppsAllowed: boolean;
 
     private abortCurrentTask () {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
