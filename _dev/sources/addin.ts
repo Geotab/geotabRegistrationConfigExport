@@ -448,12 +448,13 @@ class Addin {
                 //sets exported addins equal to none/empty array
                 this.setAddinsToNull();
             }
+            this.data.users = results[6];
             customMap = this.miscBuilder.getMapProviderData(this.data.misc.mapProvider.value);
             customMap && this.data.customMaps.push(customMap);
             reportsDependencies = this.reportsBuilder.getDependencies(this.data.reports);
             rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
             distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
-            dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
+            dependencies = this.combineDependencies({ users: this.data.users, zones: this.data.zones }, reportsDependencies, rulesDependencies, distributionListsDependencies);
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
