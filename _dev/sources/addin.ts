@@ -64,7 +64,7 @@ class Addin {
     private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
     private readonly saveBtn: HTMLElement = document.getElementById("saveButton");
     private readonly exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement;
-    private readonly exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement;
+    // private readonly exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement;
     private readonly exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
     private readonly waiting: Waiting;
     private currentTask;
@@ -407,14 +407,13 @@ class Addin {
             // thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
             usersBlock: HTMLElement = document.getElementById("exportedUsers"),
-            // exportAllUsersCheckbox: HTMLInputElement = document.getElementById("export_all_users_checkbox") as HTMLInputElement,
             zonesBlock: HTMLElement = document.getElementById("exportedZones");
             // exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
         //wire up the export button event
         this.exportBtn.addEventListener("click", this.exportData, false);
         this.saveBtn.addEventListener("click", this.saveChanges, false);
         this.exportAllAddinsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
-        this.exportAllUsersCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        // this.exportAllUsersCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
         this.exportAllZonesCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
         //wire up the includeThisAddin checkbox event
         // thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
@@ -444,16 +443,6 @@ class Addin {
             this.data.rules = results[3];
             this.data.distributionLists = this.distributionListsBuilder.getRulesDistributionLists(this.data.rules.map(rule => rule.id));
             this.data.misc = results[5];
-            customMap = this.miscBuilder.getMapProviderData(this.data.misc.mapProvider.value);
-            customMap && this.data.customMaps.push(customMap);
-            reportsDependencies = this.reportsBuilder.getDependencies(this.data.reports);
-            rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
-            distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
-            dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
-            if(this.exportAllUsersCheckbox.checked==true){
-                //sets exported users equal to all database users
-                this.data.users = results[6];
-            }
             if(this.exportAllZonesCheckbox.checked==true){
                 //sets exported zones to all database zones
                 this.data.zones = results[7];
@@ -462,6 +451,17 @@ class Addin {
                 //sets exported addins equal to none/empty array
                 this.setAddinsToNull();
             }
+            //if(this.exportAllUsersCheckbox.checked==true){
+                //sets exported users equal to all database users
+                //todo : Brett - not working due to dependency resolution to be fixed in next release iteration
+                //this.data.users = results[6];
+            //}
+            customMap = this.miscBuilder.getMapProviderData(this.data.misc.mapProvider.value);
+            customMap && this.data.customMaps.push(customMap);
+            reportsDependencies = this.reportsBuilder.getDependencies(this.data.reports);
+            rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
+            distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
+            dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
@@ -501,7 +501,7 @@ class Addin {
         this.exportBtn.removeEventListener("click", this.exportData, false);
         this.saveBtn.removeEventListener("click", this.saveChanges, false);
         this.exportAllAddinsCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
-        this.exportAllUsersCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
+        // this.exportAllUsersCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
         this.exportAllZonesCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
     }
 }
