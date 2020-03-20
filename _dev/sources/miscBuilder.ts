@@ -30,12 +30,6 @@ export class MiscBuilder {
         Here: "HERE Maps",
         MapBox: "MapBox"
     };
-    // private purgeSettings: any;
-    // private emailSenderFrom: string;
-    // private customerClassification: string;
-    // private isMarketplacePurchasesAllowed: boolean;
-    // private isResellerAutoLoginAllowed: boolean;
-    // private isThirdPartyMarketplaceAppsAllowed: boolean;
 
     private abortCurrentTask () {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
@@ -114,16 +108,10 @@ export class MiscBuilder {
                 userMapProviderId = currentUser.defaultMapEngine,
                 defaultMapProviderId = systemSettings.mapProvider,
                 mapProviderId = this.getMapProviderType(userMapProviderId) === "custom" ? userMapProviderId : defaultMapProviderId;
-            // this.purgeSettings = systemSettings.purgeSettings;
-            // this.emailSenderFrom = systemSettings.emailSenderFrom;
-            // this.customerClassification = systemSettings.customerClassification;
             this.currentUser = currentUser;
             this.customMapProviders = entityToDictionary(systemSettings.customWebMapProviderList);
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
             this.addins = this.getAllowedAddins(systemSettings.customerPages);
-            // this.isMarketplacePurchasesAllowed = systemSettings.allowMarketplacePurchases;
-            // this.isResellerAutoLoginAllowed = systemSettings.allowResellerAutoLogin;
-            // this.isThirdPartyMarketplaceAppsAllowed = systemSettings.allowThirdPartyMarketplaceApps;
             let output: IMiscData = {
                 mapProvider: {
                     value: mapProviderId,
@@ -132,12 +120,6 @@ export class MiscBuilder {
                 currentUser: this.currentUser,
                 isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed,
                 addins: this.addins,
-                // purgeSettings: this.purgeSettings,
-                // emailSenderFrom: this.emailSenderFrom,
-                // customerClassification: this.customerClassification,
-                // isMarketplacePurchasesAllowed: this.isThirdPartyMarketplaceAppsAllowed,
-                // isResellerAutoLoginAllowed: this.isResellerAutoLoginAllowed,
-                // isThirdPartyMarketplaceAppsAllowed: this.isThirdPartyMarketplaceAppsAllowed
             };
             if (includeSysSettings) {
                 output.purgeSettings = systemSettings.purgeSettings;
