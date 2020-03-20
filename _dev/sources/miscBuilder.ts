@@ -42,17 +42,6 @@ export class MiscBuilder {
         this.currentTask = null;
     }
 
-    //todo problem code...is this necessary?
-    // private getAllowedAddins (allAddins: string[]) {
-    //     return allAddins.filter(addin => {
-    //         let addinConfig = JSON.parse(addin);
-    //         return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
-    //             let url = item.url;
-    //             return url && url.indexOf("\/\/") > -1;
-    //         });
-    //     });
-    // }
-
     private getAllowedAddins (allAddins: string[]) {
         return allAddins.filter(addin => {
             //removes the current addin - registration config
