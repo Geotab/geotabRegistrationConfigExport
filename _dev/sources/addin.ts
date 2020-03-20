@@ -65,6 +65,7 @@ class Addin {
     private readonly saveBtn: HTMLElement = document.getElementById("saveButton");
     private readonly exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement;
     private readonly exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
+    private readonly exportSystemSettingsCheckbox: HTMLInputElement = document.getElementById("export_system_settings_checkbox") as HTMLInputElement;
     private readonly waiting: Waiting;
     private currentTask;
     //temporary placeholders for the objects indicated
@@ -344,6 +345,15 @@ class Addin {
         }
     }
 
+    private showSystemSettingsMessage (block: HTMLElement, isIncluded: boolean) {
+        let blockEl = block.querySelector(".description");
+        if (isIncluded) {
+            blockEl.innerHTML = "You have chosen <span class='bold'>to include</span> system settings.";
+        } else {
+            blockEl.innerHTML = "You have chosen <span class='bold'>not to include</span> system settings.";
+        }
+    }
+
     //if the includeThisAddin checkbox is changed we enter here
     private readonly toggleThisAddinIncluded = (e: Event) => {
         let isChecked = !!e.target && !!(<HTMLInputElement>e.target).checked;
@@ -406,12 +416,14 @@ class Addin {
             // thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
             usersBlock: HTMLElement = document.getElementById("exportedUsers"),
-            zonesBlock: HTMLElement = document.getElementById("exportedZones");
+            zonesBlock: HTMLElement = document.getElementById("exportedZones"),
+            systemSettingsBlock: HTMLElement = document.getElementById("exportSystemSettings");
         //wire up the export button event
         this.exportBtn.addEventListener("click", this.exportData, false);
         this.saveBtn.addEventListener("click", this.saveChanges, false);
         this.exportAllAddinsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
         this.exportAllZonesCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        this.exportSystemSettingsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
         //wire up the includeThisAddin checkbox event
         // thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
@@ -425,7 +437,7 @@ class Addin {
             this.rulesBuilder.fetch(),
             this.distributionListsBuilder.fetch(),
             //misc = system settings
-            this.miscBuilder.fetch(),
+            this.miscBuilder.fetch(this.exportSystemSettingsCheckbox.checked),
             this.userBuilder.fetch(),
             this.zoneBuilder.fetch()
         ]).then((results) => {
@@ -467,6 +479,7 @@ class Addin {
             // this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
             this.showEntityMessage(usersBlock, this.data.users.length, "user");
             this.showEntityMessage(zonesBlock, this.data.zones.length, "zone");
+            this.showSystemSettingsMessage(systemSettingsBlock, this.exportSystemSettingsCheckbox.checked);
             //this displays all the data/objects in the console
             console.log(this.data);
         }).catch((e) => {
@@ -493,6 +506,7 @@ class Addin {
         this.saveBtn.removeEventListener("click", this.saveChanges, false);
         this.exportAllAddinsCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
         this.exportAllZonesCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
+        this.exportSystemSettingsCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
     }
 }
 

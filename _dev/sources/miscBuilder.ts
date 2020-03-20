@@ -91,7 +91,7 @@ export class MiscBuilder {
     }
 
     //fills the Misc builder (system settings) with the relevant information
-    fetch (): Promise<IMiscData> {
+    fetch (includeSysSettings: boolean): Promise<IMiscData> {
         this.abortCurrentTask();
         this.currentTask = new Promise((resolve, reject) => {
             this.api.getSession((sessionData) => {
@@ -124,7 +124,7 @@ export class MiscBuilder {
             this.isMarketplacePurchasesAllowed = systemSettings.allowMarketplacePurchases;
             this.isResellerAutoLoginAllowed = systemSettings.allowResellerAutoLogin;
             this.isThirdPartyMarketplaceAppsAllowed = systemSettings.allowThirdPartyMarketplaceApps;
-            return {
+            const output = {
                 mapProvider: {
                     value: mapProviderId,
                     type: this.getMapProviderType(mapProviderId)
@@ -132,13 +132,14 @@ export class MiscBuilder {
                 currentUser: this.currentUser,
                 isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed,
                 addins: this.addins,
-                purgeSettings: this.purgeSettings,
-                emailSenderFrom: this.emailSenderFrom,
-                customerClassification: this.customerClassification,
-                isMarketplacePurchasesAllowed: this.isMarketplacePurchasesAllowed,
-                isResellerAutoLoginAllowed: this.isResellerAutoLoginAllowed,
-                isThirdPartyMarketplaceAppsAllowed: this.isThirdPartyMarketplaceAppsAllowed
+                ...(includeSysSettings && { purgeSettings: this.purgeSettings }),
+                ...(includeSysSettings) && {emailSenderFrom: this.emailSenderFrom},
+                ...(includeSysSettings) && {customerClassification: this.customerClassification},
+                ...(includeSysSettings) && {isMarketplacePurchasesAllowed: this.isMarketplacePurchasesAllowed},
+                ...(includeSysSettings) && {isResellerAutoLoginAllowed: this.isResellerAutoLoginAllowed},
+                ...(includeSysSettings) && {isThirdPartyMarketplaceAppsAllowed: this.isThirdPartyMarketplaceAppsAllowed}
             };
+            return output;
         });
         return this.currentTask;
     }

@@ -71,6 +71,23 @@
                     <p><b>Note:</b> Uncheck this box if you do not want to export all zones. If unchecked only zones linked (with dependencies) will be exported...</p>
                 </label>
             </div>
+            <div id="exportSystemSettings">
+                <h2>System Settings</h2>
+                <div class="description">You have <span class="bold">not exported any system settings.</span>.</div>
+                <label id="exportSystemSettings">
+                    <input id="export_system_settings_checkbox" value="export_system_settings" type="checkbox" class="checkboxStyle" checked></input>
+                    <span class="infoText">Export System Settings</span>
+                    <p><b>Note:</b> Uncheck this box if you do not want to export these system settings</p>
+                    <ul> 
+                        <li>Purge</li>
+                        <li>Email sender name</li>
+                        <li>Are you a government organization?</li> 
+                        <li>Allow reseller access</li>
+                        <li>Display third-party apps</li>
+                        <li>Allow purchasing on marketplace</li>
+                    </ul>
+                </label>
+            </div>
         </div>
 	</div>
     <div id="hasItemsMessageTemplate" style="display: none">You are exporting <span class="bold">{quantity}</span> {entity}.</div>
