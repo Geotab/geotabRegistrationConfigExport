@@ -10,12 +10,12 @@ export interface IMiscData {
     currentUser: any;
     isUnsignedAddinsAllowed: boolean;
     addins: string[];
-    purgeSettings: any;
-    emailSenderFrom: string;
-    customerClassification: string;
-    isMarketplacePurchasesAllowed: boolean;
-    isResellerAutoLoginAllowed: boolean;
-    isThirdPartyMarketplaceAppsAllowed: boolean;
+    purgeSettings?: any;
+    emailSenderFrom?: string;
+    customerClassification?: string;
+    isMarketplacePurchasesAllowed?: boolean;
+    isResellerAutoLoginAllowed?: boolean;
+    isThirdPartyMarketplaceAppsAllowed?: boolean;
 }
 
 export class MiscBuilder {
