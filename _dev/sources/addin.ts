@@ -399,6 +399,14 @@ class Addin {
         (<HTMLInputElement>this.exportBtn).disabled = true;
     }
 
+    addEventHandlers() {
+        this.exportBtn.addEventListener("click", this.exportData, false);
+        this.saveBtn.addEventListener("click", this.saveChanges, false);
+        this.exportAllAddinsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        this.exportAllZonesCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        this.exportSystemSettingsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+    }
+
     render () {
         this.data.users = [];
         this.data.zones = [];
@@ -419,11 +427,11 @@ class Addin {
             zonesBlock: HTMLElement = document.getElementById("exportedZones"),
             systemSettingsBlock: HTMLElement = document.getElementById("exportSystemSettings");
         //wire up the export button event
-        this.exportBtn.addEventListener("click", this.exportData, false);
-        this.saveBtn.addEventListener("click", this.saveChanges, false);
-        this.exportAllAddinsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
-        this.exportAllZonesCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
-        this.exportSystemSettingsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        // this.exportBtn.addEventListener("click", this.exportData, false);
+        // this.saveBtn.addEventListener("click", this.saveChanges, false);
+        // this.exportAllAddinsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        // this.exportAllZonesCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
+        // this.exportSystemSettingsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
         //wire up the includeThisAddin checkbox event
         // thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
@@ -516,6 +524,7 @@ geotab.addin.registrationConfig = function () {
     return {
         initialize: (api, state, callback) => {
             addin = new Addin(api);
+            addin.addEventHandlers();
             callback();
         },
         focus: () => {
