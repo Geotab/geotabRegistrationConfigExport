@@ -419,21 +419,10 @@ class Addin {
             reportsBlock: HTMLElement = document.getElementById("exportedReports"),
             dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards"),
             addinsBlock: HTMLElement = document.getElementById("exportedAddins"),
-            // exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement,
-            // thisAddinBlock: HTMLElement = document.getElementById("includeThisAddin"),
-            // thisAddinIncludedCheckbox: HTMLElement = document.querySelector("#includeThisAddin > input"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
             usersBlock: HTMLElement = document.getElementById("exportedUsers"),
             zonesBlock: HTMLElement = document.getElementById("exportedZones"),
             systemSettingsBlock: HTMLElement = document.getElementById("exportSystemSettings");
-        //wire up the export button event
-        // this.exportBtn.addEventListener("click", this.exportData, false);
-        // this.saveBtn.addEventListener("click", this.saveChanges, false);
-        // this.exportAllAddinsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
-        // this.exportAllZonesCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
-        // this.exportSystemSettingsCheckbox.addEventListener("change", this.checkBoxValueChanged, false);
-        //wire up the includeThisAddin checkbox event
-        // thisAddinIncludedCheckbox.addEventListener("change", this.toggleThisAddinIncluded, false);
         this.toggleWaiting(true);
         return together([
             //loads the groups. This is where users are added if they are linked to a group
