@@ -449,9 +449,17 @@ class Addin {
             this.data.rules = results[3];
             this.data.distributionLists = this.distributionListsBuilder.getRulesDistributionLists(this.data.rules.map(rule => rule.id));
             this.data.misc = results[5];
+            let getDependencies = (entities: any[], entityType: string) => {
+                return entities.reduce((res, entity) => {
+                    let entityDep = this.getEntityDependencies(entity, entityType);
+                    return this.combineDependencies(res, entityDep);
+                }, {});
+            };
+            let zoneDependencies = {};
             if(this.exportAllZonesCheckbox.checked==true){
                 //sets exported zones to all database zones
                 this.data.zones = results[7];
+                zoneDependencies = getDependencies(results[7], "Zone");
             }
             if(this.exportAllAddinsCheckbox.checked==false){
                 //sets exported addins equal to none/empty array
@@ -462,7 +470,7 @@ class Addin {
             reportsDependencies = this.reportsBuilder.getDependencies(this.data.reports);
             rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
             distributionListsDependencies = this.distributionListsBuilder.getDependencies(this.data.distributionLists);
-            dependencies = this.combineDependencies(reportsDependencies, rulesDependencies, distributionListsDependencies);
+            dependencies = this.combineDependencies(zoneDependencies, reportsDependencies, rulesDependencies, distributionListsDependencies);
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
             let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
