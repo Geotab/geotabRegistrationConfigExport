@@ -363,6 +363,12 @@ class Addin {
         this.data.misc.addins = addinsData;
     }
 
+    private setAddinsToNull() {
+        if ((this.data.misc != null) || (this.data.misc != undefined)) {
+            this.data.misc.addins = [];
+        }
+    }
+
     //initialize addin 
     constructor (api) {
         this.api = api;
@@ -372,7 +378,8 @@ class Addin {
         this.rulesBuilder = new RulesBuilder(api);
         this.distributionListsBuilder = new DistributionListsBuilder(api);
         this.miscBuilder = new MiscBuilder(api);
-        this.userBuilder = new UserBuilder(api);
+        //TODO: Brett - left here as I will be introducing the user fetch soon
+        // this.userBuilder = new UserBuilder(api);
         this.zoneBuilder = new ZoneBuilder(api);
         this.waiting = new Waiting();
     }
@@ -408,7 +415,8 @@ class Addin {
     }
 
     render () {
-        this.data.users = [];
+        //TODO: Brett - left here as I will be introducing the user fetch soon
+        // this.data.users = [];
         this.data.zones = [];
         this.setAddinsToNull();
         //wire up the dom
@@ -435,7 +443,8 @@ class Addin {
             this.distributionListsBuilder.fetch(),
             //misc = system settings
             this.miscBuilder.fetch(this.exportSystemSettingsCheckbox.checked),
-            this.userBuilder.fetch(),
+            //TODO: Brett - left here as I will be introducing the user fetch soon
+            // this.userBuilder.fetch(),
             this.zoneBuilder.fetch()
         ]).then((results) => {
             let reportsDependencies: IDependencies,
@@ -457,9 +466,11 @@ class Addin {
             };
             let zoneDependencies = {};
             if(this.exportAllZonesCheckbox.checked==true){
-                //sets exported zones to all database zones
-                this.data.zones = results[7];
-                zoneDependencies = getDependencies(results[7], "Zone");
+                if(results[6]){
+                    //sets exported zones to all database zones
+                    this.data.zones = results[6];
+                    zoneDependencies = getDependencies(results[6], "Zone");
+                }
             }
             if(this.exportAllAddinsCheckbox.checked==false){
                 //sets exported addins equal to none/empty array
@@ -491,12 +502,6 @@ class Addin {
             console.error(e);
             alert("Can't get config to export");
         }).finally(() => this.toggleWaiting());
-    }
-
-    private setAddinsToNull() {
-        if ((this.data.misc != null) || (this.data.misc != undefined)) {
-            this.data.misc.addins = [];
-        }
     }
 
     unload () {
