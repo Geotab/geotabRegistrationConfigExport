@@ -427,7 +427,7 @@ class Addin {
             dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards"),
             addinsBlock: HTMLElement = document.getElementById("exportedAddins"),
             mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
-            usersBlock: HTMLElement = document.getElementById("exportedUsers"),
+            // usersBlock: HTMLElement = document.getElementById("exportedUsers"),
             zonesBlock: HTMLElement = document.getElementById("exportedZones"),
             systemSettingsBlock: HTMLElement = document.getElementById("exportSystemSettings");
         this.toggleWaiting(true);
