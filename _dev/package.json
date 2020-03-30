@@ -11,12 +11,10 @@
     "startServer": "node ../../../start.js",
     "watch": "watchify sources/addin.ts -p tsify --debug -o ../addin.js -dv",
     "build": "browserify sources/addin.ts -p tsify > ../addin.js",
-    "start": "start npm run startServer & start npm run watch",
-    "copyfiles": "copyfiles -u 1 ../addin.js ../addin.css ../configuration.json ../registrationConfig.html \"../libs/*/**\" ../public/"
+    "start": "start npm run startServer & start npm run watch"
   },
   "dependencies": {
     "browserify": "^16.2.3",
-    "copyfiles": "^2.2.0",
     "tsify": "^4.0.1",
     "typescript": "^3.5.2",
     "watchify": "^3.11.1"
