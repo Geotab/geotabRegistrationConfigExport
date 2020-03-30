@@ -418,7 +418,6 @@ class Addin {
         //TODO: Brett - left here as I will be introducing the user fetch soon
         // this.data.users = [];
         this.data.zones = [];
-        this.setAddinsToNull();
         //wire up the dom
         let mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
             groupsBlock: HTMLElement = document.getElementById("exportedGroups"),
