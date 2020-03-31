@@ -68,9 +68,6 @@ class Addin {
     private readonly exportSystemSettingsCheckbox: HTMLInputElement = document.getElementById("export_system_settings_checkbox") as HTMLInputElement;
     private readonly waiting: Waiting;
     private currentTask;
-    //temporary placeholders for the objects indicated
-    private tempUsers: [];
-    private tempZones
     private readonly data: IImportData = {
         groups: [],
         reports: [],
