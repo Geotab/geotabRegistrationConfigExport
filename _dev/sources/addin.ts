@@ -6,7 +6,7 @@ import DistributionListsBuilder from "./distributionListsBuilder";
 import {IMiscData, MiscBuilder} from "./miscBuilder";
 import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise} from "./utils";
 import Waiting from "./waiting";
-import {UserBuilder} from "./userBuilder";
+// import {UserBuilder} from "./userBuilder";
 import {ZoneBuilder} from "./zoneBuilder";
 
 interface Geotab {
@@ -59,7 +59,7 @@ class Addin {
     private readonly rulesBuilder: RulesBuilder;
     private readonly distributionListsBuilder: DistributionListsBuilder;
     private readonly miscBuilder: MiscBuilder;
-    private readonly userBuilder: UserBuilder;
+    // private readonly userBuilder: UserBuilder;
     private readonly zoneBuilder: ZoneBuilder;
     private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
     private readonly saveBtn: HTMLElement = document.getElementById("saveButton");
