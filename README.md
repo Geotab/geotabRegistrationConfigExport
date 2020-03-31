@@ -9,7 +9,24 @@ Exports groups, rules, reports, dashboards, map providers and addins (exports on
 
 ## Installation
 
-Install this add-in into MyGeotab application you want to export settings from
+Install this add-in into MyGeotab application you want to export settings from. Use configuration below:
+```
+{
+	"name": "Registration config",
+	"supportEmail": "nickklimkovich@geotab.com",
+	"version": "1.0",
+	"items": [
+		{
+			"url": "https://cdn.jsdelivr.net/gh/Geotab/geotabRegistrationConfigExport@master/registrationConfig.html",
+			"path": "AdministrationLink/",
+			"menuName": {
+				"en": "Registration config"
+			}
+		}
+	],
+	"isSigned": false
+}
+```
 
 ## Development
 
@@ -21,7 +38,7 @@ Make sure you have [Node.js](https://nodejs.org/) installed.
 * watchify
 * MyGeotabDevTool (recommended)
 
-Get repo and run
+Get repo, copy it to MyGeotabDevTool/DevTool/addins/ folder and run:
 ``` 
 $> cd RegistrationConfig/_dev
 $> npm install
