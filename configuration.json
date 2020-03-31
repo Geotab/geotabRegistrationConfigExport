@@ -1,15 +1,13 @@
 {
-	"name": "Registration config",
-	"supportEmail": "nickklimkovich@geotab.com",
-	"version": "1.0",
-	"items": [
-		{
-			"url": "https://cdn.jsdelivr.net/gh/Geotab/geotabRegistrationConfigExport@master/registrationConfig.html",
-			"path": "AdministrationLink/",
-			"menuName": {
-				"en": "Registration config"
-			}
-		}
-	],
-	"isSigned": false
+    "name": "Registration config",
+    "supportEmail": "nickklimkovich@geotab.com",
+    "version": "1.0",
+    "items": [{
+            "url": "registrationConfig.html",
+            "path": "AdministrationLink/",
+            "menuName": {
+                "en": "Registration config"
+            }
+        }
+    ]
 }
