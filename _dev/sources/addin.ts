@@ -482,7 +482,6 @@ class Addin {
             this.showEntityMessage(dashboardsBlock, this.reportsBuilder.getDashboardsQty(), "dashboard");
             mapProvider && (mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider));
             this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
-            // this.miscBuilder.isThisAddinIncluded() && thisAddinBlock.classList.remove("hidden");
             // this.showEntityMessage(usersBlock, this.data.users.length, "user");
             this.showEntityMessage(zonesBlock, this.data.zones.length, "zone");
             this.showSystemSettingsMessage(systemSettingsBlock, this.exportSystemSettingsCheckbox.checked);
