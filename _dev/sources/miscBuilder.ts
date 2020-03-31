@@ -146,10 +146,6 @@ export class MiscBuilder {
         return mapProviderId && this.customMapProviders[mapProviderId];
     }
 
-    isThisAddinIncluded () {
-        return this.addins.some(this.isCurrentAddin);
-    }
-
     getAddinsData (includeThisAddin = false) {
         return !includeThisAddin ? this.addins.filter(addin => !this.isCurrentAddin(addin)) : this.addins;
     }
