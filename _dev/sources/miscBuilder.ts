@@ -119,7 +119,7 @@ export class MiscBuilder {
                 },
                 currentUser: this.currentUser,
                 isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed,
-                addins: this.addins,
+                addins: this.addins
             };
             if (includeSysSettings) {
                 output.purgeSettings = systemSettings.purgeSettings;
