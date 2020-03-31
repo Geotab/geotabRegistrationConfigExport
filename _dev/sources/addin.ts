@@ -515,11 +515,11 @@ geotab.addin.registrationConfig = function () {
     return {
         initialize: (api, state, callback) => {
             addin = new Addin(api);
-            addin.addEventHandlers();
             callback();
         },
         focus: () => {
             addin.render();
+            addin.addEventHandlers();
         },
         blur: () => {
             addin.unload();
