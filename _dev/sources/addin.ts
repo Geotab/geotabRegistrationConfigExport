@@ -354,15 +354,6 @@ class Addin {
         }
     }
 
-    //if the includeThisAddin checkbox is changed we enter here
-    private readonly toggleThisAddinIncluded = (e: Event) => {
-        let isChecked = !!e.target && !!(<HTMLInputElement>e.target).checked;
-        let addinsBlock: HTMLElement = document.getElementById("exportedAddins");
-        let addinsData = this.miscBuilder.getAddinsData(!isChecked);
-        this.showEntityMessage(addinsBlock, addinsData.length, "addin");
-        this.data.misc.addins = addinsData;
-    }
-
     private setAddinsToNull() {
         if ((this.data.misc != null) || (this.data.misc != undefined)) {
             this.data.misc.addins = [];
