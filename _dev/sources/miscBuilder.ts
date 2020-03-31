@@ -69,12 +69,6 @@ export class MiscBuilder {
         return false;
     }
 
-    private removeExportAddin (allAddins: string[]) {
-        return allAddins.filter(addin => {
-            return (addin.toLowerCase().indexOf("registrationConfig".toLowerCase()) <= 0);
-        });
-    }
-
     private isCurrentAddin (addin: string) {
         return ((addin.indexOf("Registration config") > -1)||
         (addin.toLowerCase().indexOf("registrationConfig".toLowerCase()) > -1));
