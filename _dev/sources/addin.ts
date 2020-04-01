@@ -49,6 +49,8 @@ interface IDependencies {
     notificationTemplates?: string[];
 }
 
+type TEntityType = keyof IImportData;
+
 declare const geotab: Geotab;
 
 class Addin {
@@ -150,7 +152,7 @@ class Addin {
         }, []);
     }
 
-    private getEntityDependencies (entity: IEntity, entityType) {
+    private getEntityDependencies (entity: IEntity, entityType: TEntityType) {
         let entityDependencies: IDependencies = {};
         switch (entityType) {
             case "devices":
@@ -176,9 +178,9 @@ class Addin {
         return entityDependencies;
     }
 
-    private applyToEntities (entitiesList: IDependencies, initialValue, func: (result, entity, entityType: string, entityIndex: number, entityTypeIndex: number, overallIndex: number) => any) {
+    private applyToEntities (entitiesList: IDependencies, initialValue, func: (result, entity, entityType: TEntityType, entityIndex: number, entityTypeIndex: number, overallIndex: number) => any) {
         let overallIndex = 0;
-        return Object.keys(entitiesList).reduce((result, entityType, typeIndex) => {
+        return Object.keys(entitiesList).reduce((result, entityType: TEntityType, typeIndex) => {
             return entitiesList[entityType].reduce((res, entity, index) => {
                 overallIndex++;
                 return func(res, entity, entityType, index, typeIndex, overallIndex - 1);
@@ -445,7 +447,7 @@ class Addin {
             this.data.rules = results[3];
             this.data.distributionLists = this.distributionListsBuilder.getRulesDistributionLists(this.data.rules.map(rule => rule.id));
             this.data.misc = results[5];
-            let getDependencies = (entities: any[], entityType: string) => {
+            let getDependencies = (entities: any[], entityType: TEntityType) => {
                 return entities.reduce((res, entity) => {
                     let entityDep = this.getEntityDependencies(entity, entityType);
                     return this.combineDependencies(res, entityDep);
@@ -456,7 +458,7 @@ class Addin {
                 if(results[6]){
                     //sets exported zones to all database zones
                     this.data.zones = results[6];
-                    zoneDependencies = getDependencies(results[6], "Zone");
+                    zoneDependencies = getDependencies(results[6], "zones");
                 }
             }
             if(this.exportAllAddinsCheckbox.checked==false){
