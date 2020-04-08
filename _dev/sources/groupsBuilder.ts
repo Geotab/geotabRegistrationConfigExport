@@ -31,6 +31,7 @@ export default class GroupsBuilder {
         this.api = api;
     }
 
+    //gets the groups associated with the current user
     private getGroups (): Promise<any> {
         return new Promise((resolve, reject) => {
             this.api.getSession((sessionData) => {
@@ -146,6 +147,7 @@ export default class GroupsBuilder {
         this.currentTask = null;
     };
 
+    //fills the group builder with the relevant information
     public fetch (): Promise<any> {
         this.abortCurrentTask();
         this.currentTask = this.getGroups()
