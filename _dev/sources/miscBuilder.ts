@@ -129,7 +129,7 @@ export class MiscBuilder {
     }
 
     getMapProviderType (mapProviderId: string): TMapProviderType {
-        return this.defaultMapProviders[mapProviderId] ? "default" : "custom";
+        return !mapProviderId || this.defaultMapProviders[mapProviderId] ? "default" : "custom";
     }
 
     getMapProviderName (mapProviderId: string): string {

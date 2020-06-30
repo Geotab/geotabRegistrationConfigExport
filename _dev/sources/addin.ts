@@ -31,6 +31,7 @@ interface IImportData {
     customMaps: any[];
     misc: IMiscData;
     notificationTemplates: any[];
+    certificates: any[];
 }
 interface IDependencies {
     groups?: string[];
@@ -47,6 +48,7 @@ interface IDependencies {
     diagnostics?: string[];
     customMaps?: string[];
     notificationTemplates?: string[];
+    certificates?: string[];
 }
 
 type TEntityType = keyof IImportData;
@@ -85,7 +87,8 @@ class Addin {
         customMaps: [],
         diagnostics: [],
         misc: null,
-        notificationTemplates: []
+        notificationTemplates: [],
+        certificates: []
     };
 
     private combineDependencies (...allDependencies: IDependencies[]): IDependencies {
@@ -163,6 +166,9 @@ class Addin {
                 entityDependencies.groups = this.getEntytiesIds(entity["companyGroups"].concat(entity["driverGroups"]).concat(entity["privateUserGroups"]).concat(entity["reportGroups"]));
                 entityDependencies.securityGroups = this.getEntytiesIds(entity["securityGroups"]);
                 entityDependencies.customMaps = [entity["defaultMapEngine"]];
+                if (entity.issuerCertificate) {
+                    entityDependencies.certificates = [ entity.issuerCertificate.id ]
+                }
                 break;
             case "zones":
                 let zoneTypes = this.getEntytiesIds(entity["zoneTypes"]);
@@ -199,6 +205,7 @@ class Addin {
                         workHolidays: "WorkHoliday",
                         securityGroups: "Group",
                         diagnostics: "Diagnostic",
+                        certificates: "Certificate"
                     },
                     requests: any = this.applyToEntities(entitiesList, {}, (result, entityId, entityType) => {
                         let request = {
@@ -479,7 +486,9 @@ class Addin {
             this.showEntityMessage(rulesBlock, this.data.rules.length, "rule");
             this.showEntityMessage(reportsBlock, this.reportsBuilder.getCustomizedReportsQty(), "report");
             this.showEntityMessage(dashboardsBlock, this.reportsBuilder.getDashboardsQty(), "dashboard");
-            mapProvider && (mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider));
+            if (mapProvider) {
+                mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider);
+            }
             this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
             // this.showEntityMessage(usersBlock, this.data.users.length, "user");
             this.showEntityMessage(zonesBlock, this.data.zones.length, "zone");
