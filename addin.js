@@ -373,6 +373,7 @@ var Addin = /** @class */ (function () {
             _this.data.reports = results[2];
             _this.data.rules = results[3];
             _this.data.distributionLists = _this.distributionListsBuilder.getRulesDistributionLists(_this.data.rules.map(function (rule) { return rule.id; }));
+            _this.data.notificationTemplates = results[4];
             _this.data.misc = results[5];
             var getDependencies = function (entities, entityType) {
                 return entities.reduce(function (res, entity) {
@@ -529,7 +530,7 @@ var DistributionListsBuilder = /** @class */ (function () {
             var distributionLists = _a[0], webTemplates = _a[1], emailTemplates = _a[2], textTemplates = _a[3];
             _this.distributionLists = utils_1.entityToDictionary(distributionLists);
             _this.notificationTemplates = utils_1.entityToDictionary(webTemplates.concat(emailTemplates).concat(textTemplates));
-            return _this.distributionLists;
+            return _this.notificationTemplates;
         })["catch"](console.error)["finally"](function () {
             _this.currentTask = null;
         });
