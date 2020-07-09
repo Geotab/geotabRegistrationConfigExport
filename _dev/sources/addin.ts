@@ -266,8 +266,6 @@ class Addin {
                                                     return result;
                                                 }
                                                 return false;
-                                            } else if (entityType === "users") {
-                                                item.userAuthenticationType = "BasicAuthentication";
                                             }
                                             let entityDependencies = this.getEntityDependencies(item, entityType);
                                             newDependencies = this.applyToEntities(entityDependencies, newDependencies, (result, entityId, entityType) => {
