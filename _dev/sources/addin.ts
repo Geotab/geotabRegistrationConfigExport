@@ -29,7 +29,7 @@ interface IImportData {
     securityGroups: any[];
     diagnostics: any[];
     customMaps: any[];
-    misc: IMiscData;
+    misc: IMiscData | null;
     notificationTemplates: any[];
     certificates: any[];
 }
@@ -65,8 +65,8 @@ class Addin {
     private readonly miscBuilder: MiscBuilder;
     // private readonly userBuilder: UserBuilder;
     private readonly zoneBuilder: ZoneBuilder;
-    private readonly exportBtn: HTMLElement = document.getElementById("exportButton");
-    private readonly saveBtn: HTMLElement = document.getElementById("saveButton");
+    private readonly exportBtn: HTMLElement = document.getElementById("exportButton") as HTMLElement;
+    private readonly saveBtn: HTMLElement = document.getElementById("saveButton") as HTMLElement;
     private readonly exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement;
     private readonly exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
     private readonly exportSystemSettingsCheckbox: HTMLInputElement = document.getElementById("export_system_settings_checkbox") as HTMLInputElement;
@@ -114,7 +114,7 @@ class Addin {
     }
 
     private addNewGroups (groups: string[], data: IImportData): Promise<any> {
-        if (!groups || !groups.length) {
+        if (!groups.length) {
             return resolvedPromise();
         }
         let groupsData = this.groupsBuilder.getGroupsData(groups, true),
@@ -128,7 +128,7 @@ class Addin {
         if (!customMapsIds || !customMapsIds.length) {
             return false;
         }
-        let customMapsData = customMapsIds.reduce((data, customMapId: string) => {
+        let customMapsData = customMapsIds.reduce((data: any[], customMapId: string) => {
             let customMapData = this.miscBuilder.getMapProviderData(customMapId);
             customMapData && data.push(customMapData);
             return data;
@@ -140,7 +140,7 @@ class Addin {
         if (!notificationTemplatesIds || !notificationTemplatesIds.length) {
             return false;
         }
-        let notificationTemplatesData = notificationTemplatesIds.reduce((data, templateId: string) => {
+        let notificationTemplatesData = notificationTemplatesIds.reduce((data: any[], templateId: string) => {
             let templateData = this.distributionListsBuilder.getNotificationTemplateData(templateId);
             templateData && data.push(templateData);
             return data;
@@ -149,7 +149,7 @@ class Addin {
     }
 
     private getEntytiesIds (entities: IEntity[]): string[] {
-        return entities.reduce((res, entity) => {
+        return entities.reduce((res: string[], entity) => {
             entity && entity.id && res.push(entity.id);
             return res;
         }, []);
@@ -184,12 +184,12 @@ class Addin {
         return entityDependencies;
     }
 
-    private applyToEntities (entitiesList: IDependencies, initialValue, func: (result, entity, entityType: TEntityType, entityIndex: number, entityTypeIndex: number, overallIndex: number) => any) {
+    private applyToEntities <T>(entitiesList: IDependencies, initialValue, func: (result, entity, entityType: TEntityType, entityIndex: number, entityTypeIndex: number, overallIndex: number) => T) {
         let overallIndex = 0;
-        return Object.keys(entitiesList).reduce((result, entityType: TEntityType, typeIndex) => {
-            return entitiesList[entityType].reduce((res, entity, index) => {
+        return Object.keys(entitiesList).reduce((result: T, entityType: string, typeIndex: number) => {
+            return entitiesList[entityType].reduce((res: T, entity, index) => {
                 overallIndex++;
-                return func(res, entity, entityType, index, typeIndex, overallIndex - 1);
+                return func(res, entity, entityType as TEntityType, index, typeIndex, overallIndex - 1);
             }, result);
         }, initialValue);
     }
@@ -238,9 +238,9 @@ class Addin {
                     }]];
                 }
 
-                return this.addNewGroups(entitiesList.groups, data).then(() => {
-                    this.addNewCustomMaps(entitiesList.customMaps, data);
-                    this.addNewNotificationTemplates(entitiesList.notificationTemplates, data);
+                return this.addNewGroups(entitiesList.groups || [], data).then(() => {
+                    this.addNewCustomMaps(entitiesList.customMaps || [], data);
+                    this.addNewNotificationTemplates(entitiesList.notificationTemplates || [], data);
                     delete entitiesList.groups;
                     delete entitiesList.customMaps;
                     return new Promise<IImportData>((resolve, reject) => {
@@ -250,19 +250,19 @@ class Addin {
                             return resolve(data);
                         }
                         this.api.multiCall(requestsArray, (response) => {
-                                let newGroups = [],
-                                    newCustomMaps = [],
+                                let newGroups: string[] = [],
+                                    newCustomMaps: string[] = [],
                                     newDependencies: IDependencies = {},
                                     exportedData: any = this.applyToEntities(requests, {}, (result, request, entityType, entityIndex, entityTypeIndex, overallIndex) => {
                                         let items = requestsArray.length > 1 ? response[overallIndex] : response;
                                         items.forEach((item) => {
                                             item = item[0] || item;
                                             !result[entityType] && (result[entityType] = []);
-                                            if (entityType === "workHolidays" && (!item.holidayGroup || entitiesList.workHolidays.indexOf(item.holidayGroup.groupId) === -1)) {
+                                            if (entityType === "workHolidays" && (!item.holidayGroup || (entitiesList.workHolidays || []).indexOf(item.holidayGroup.groupId) === -1)) {
                                                 return false;
                                             } else if (entityType === "securityGroups") {
-                                                if (entitiesList.securityGroups.indexOf(item.id) > -1) {
-                                                    result[entityType] = result[entityType].concat(this.groupsBuilder.getCustomGroupsData(entitiesList.securityGroups, items));
+                                                if ((entitiesList.securityGroups || []).indexOf(item.id) > -1) {
+                                                    result[entityType] = result[entityType].concat(this.groupsBuilder.getCustomGroupsData(entitiesList.securityGroups || [], items));
                                                     return result;
                                                 }
                                                 return false;
@@ -330,7 +330,7 @@ class Addin {
     private readonly toggleWaiting = (isStart = false) => {
         if (isStart) {
             this.toggleExportButton(true);
-            this.waiting.start(document.getElementById("addinContainer").parentElement, 9999);
+            this.waiting.start((document.getElementById("addinContainer") as HTMLElement).parentElement as HTMLElement, 9999);
         } else {
             this.toggleExportButton(false);
             this.waiting.stop();
@@ -339,10 +339,10 @@ class Addin {
 
     //Brett - displays the output on the page
     private showEntityMessage (block: HTMLElement, qty: number, entityName: string) {
-        let blockEl = block.querySelector(".description");
+        let blockEl = block.querySelector(".description") as HTMLElement;
         if (qty) {
             qty > 1 && (entityName += "s");
-            let hasItemsMessageTemplate = document.getElementById("hasItemsMessageTemplate").innerHTML;
+            let hasItemsMessageTemplate = (document.getElementById("hasItemsMessageTemplate") as HTMLElement).innerHTML;
             blockEl.innerHTML = hasItemsMessageTemplate.replace("{quantity}", qty.toString()).replace("{entity}", entityName);
         } else {
             blockEl.innerHTML = `You have <span class="bold">not configured any ${ entityName }s</span>.`;
@@ -350,7 +350,7 @@ class Addin {
     }
 
     private showSystemSettingsMessage (block: HTMLElement, isIncluded: boolean) {
-        let blockEl = block.querySelector(".description");
+        let blockEl = block.querySelector(".description") as HTMLElement;
         if (isIncluded) {
             blockEl.innerHTML = "You have chosen <span class='bold'>to include</span> system settings.";
         } else {
@@ -364,7 +364,7 @@ class Addin {
         }
     }
 
-    //initialize addin 
+    //initialize addin
     constructor (api) {
         this.api = api;
         this.groupsBuilder = new GroupsBuilder(api);
@@ -414,17 +414,17 @@ class Addin {
         // this.data.users = [];
         this.data.zones = [];
         //wire up the dom
-        let mapMessageTemplate: string = document.getElementById("mapMessageTemplate").innerHTML,
-            groupsBlock: HTMLElement = document.getElementById("exportedGroups"),
-            securityClearancesBlock: HTMLElement = document.getElementById("exportedSecurityClearances"),
-            rulesBlock: HTMLElement = document.getElementById("exportedRules"),
-            reportsBlock: HTMLElement = document.getElementById("exportedReports"),
-            dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards"),
-            addinsBlock: HTMLElement = document.getElementById("exportedAddins"),
-            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description"),
+        let mapMessageTemplate: string = (document.getElementById("mapMessageTemplate") as HTMLElement).innerHTML,
+            groupsBlock: HTMLElement = document.getElementById("exportedGroups") as HTMLElement,
+            securityClearancesBlock: HTMLElement = document.getElementById("exportedSecurityClearances") as HTMLElement,
+            rulesBlock: HTMLElement = document.getElementById("exportedRules") as HTMLElement,
+            reportsBlock: HTMLElement = document.getElementById("exportedReports") as HTMLElement,
+            dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards") as HTMLElement,
+            addinsBlock: HTMLElement = document.getElementById("exportedAddins") as HTMLElement,
+            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description") as HTMLElement,
             // usersBlock: HTMLElement = document.getElementById("exportedUsers"),
-            zonesBlock: HTMLElement = document.getElementById("exportedZones"),
-            systemSettingsBlock: HTMLElement = document.getElementById("exportSystemSettings");
+            zonesBlock: HTMLElement = document.getElementById("exportedZones") as HTMLElement,
+            systemSettingsBlock: HTMLElement = document.getElementById("exportSystemSettings") as HTMLElement;
         this.toggleWaiting(true);
         return together([
             //loads the groups. This is where users are added if they are linked to a group
@@ -470,7 +470,7 @@ class Addin {
                 //sets exported addins equal to none/empty array
                 this.setAddinsToNull();
             }
-            customMap = this.miscBuilder.getMapProviderData(this.data.misc.mapProvider.value);
+            customMap = this.data.misc && this.miscBuilder.getMapProviderData(this.data.misc.mapProvider.value);
             customMap && this.data.customMaps.push(customMap);
             reportsDependencies = this.reportsBuilder.getDependencies(this.data.reports);
             rulesDependencies = this.rulesBuilder.getDependencies(this.data.rules);
@@ -478,7 +478,7 @@ class Addin {
             dependencies = this.combineDependencies(zoneDependencies, reportsDependencies, rulesDependencies, distributionListsDependencies);
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
-            let mapProvider = this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
+            let mapProvider = this.data.misc && this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
             this.showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
             this.showEntityMessage(securityClearancesBlock, this.data.securityGroups.length, "security clearance");
             this.showEntityMessage(rulesBlock, this.data.rules.length, "rule");
@@ -487,7 +487,7 @@ class Addin {
             if (mapProvider) {
                 mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider);
             }
-            this.showEntityMessage(addinsBlock, this.data.misc.addins.length, "addin");
+            this.showEntityMessage(addinsBlock, this.data.misc?.addins?.length || 0, "addin");
             // this.showEntityMessage(usersBlock, this.data.users.length, "user");
             this.showEntityMessage(zonesBlock, this.data.zones.length, "zone");
             this.showSystemSettingsMessage(systemSettingsBlock, this.exportSystemSettingsCheckbox.checked);

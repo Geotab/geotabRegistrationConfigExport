@@ -10,7 +10,7 @@ export default class Waiting {
         this.waitingContainer = document.createElement("div");
         this.waitingContainer.className = "waiting";
         this.waitingContainer.innerHTML = "<div class='fader'></div><div class='spinner'></div>";
-        el.parentNode.appendChild(this.waitingContainer);
+        el.parentNode?.appendChild(this.waitingContainer);
 
         this.waitingContainer.style.position = "absolute";
         this.waitingContainer.style.width = el.offsetWidth + "px";

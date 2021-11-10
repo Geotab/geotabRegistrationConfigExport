@@ -1,5 +1,5 @@
 /// <reference path="../bluebird.d.ts"/>
-import * as Utils from "./utils";
+import { entityToDictionary, extend, IEntity } from "./utils";
 
 interface Color {
     r: number;
@@ -15,6 +15,10 @@ interface IGroup {
     parent?: IGroup;
     children?: IGroup[];
     user?: any;
+}
+
+interface INewGroup extends Omit<IGroup, "id"> {
+    id: null;
 }
 
 export default class GroupsBuilder {
@@ -48,8 +52,8 @@ export default class GroupsBuilder {
         });
     };
 
-    private findChild (childId: string, currentItem: IGroup, onAllLevels: boolean = false): IGroup {
-        let foundChild = null,
+    private findChild (childId: string, currentItem: INewGroup | IGroup, onAllLevels: boolean = false): IGroup | null {
+        let foundChild: IGroup | null = null,
             children = currentItem.children;
         if (!childId || !children || !children.length) {
             return null;
@@ -125,8 +129,8 @@ export default class GroupsBuilder {
                 }
             };
 
-        nodeLookup = Utils.entityToDictionary(groups, entity => {
-            let newEntity = Utils.extend({}, entity);
+        nodeLookup = entityToDictionary(groups, entity => {
+            let newEntity = extend({}, entity);
             if (newEntity.children) {
                 newEntity.children = newEntity.children.slice();
             }
@@ -155,7 +159,7 @@ export default class GroupsBuilder {
                 this.groups = groups;
                 this.users = users;
                 this.tree = this.createGroupsTree(groups);
-                this.currentTree = Utils.extend({}, this.tree);
+                this.currentTree = extend({}, this.tree);
                 return this.createFlatGroupsList(this.tree);
             })
             .catch(console.error)
@@ -166,10 +170,10 @@ export default class GroupsBuilder {
     };
 
     public createFlatGroupsList (groups: IGroup[], notIncludeChildren: boolean = false): IGroup[] {
-        let foundIds = [],
-            groupsToAdd = [],
-            makeFlatParents = (item) => {
-                let itemCopy = Utils.extend({}, item);
+        let foundIds: string[] = [],
+            groupsToAdd: IGroup[] = [],
+            makeFlatParents = (item: IGroup) => {
+                let itemCopy = extend({}, item);
                 if (item && item.parent) {
                     makeFlatParents(item.parent);
                 }
@@ -187,7 +191,7 @@ export default class GroupsBuilder {
                         if (foundIds.indexOf(child.id) === -1) {
                             makeFlatChildren(child);
                         }
-                        childCopy = Utils.extend({}, child);
+                        childCopy = extend({}, child);
                         childCopy.children = childCopy.children.map(childInner => childInner.id);
                         childCopy.parent = childCopy.parent ? {id: childCopy.parent.id, name: childCopy.parent.name} : null;
                         if (foundIds.indexOf(child.id) === -1) {
@@ -212,14 +216,14 @@ export default class GroupsBuilder {
 
     public getCustomGroupsData (groupIds: string[], allGroups: IGroup[]): IGroup[] {
         let groupsTree = this.createGroupsTree(allGroups),
-            treeGroups = groupIds.map(groupId => 
+            treeGroups = groupIds.map(groupId =>
                 this.findChild(groupId, {id: null, children: groupsTree}, true) || this.getPrivateGroupData(groupId)
             );
         return this.createFlatGroupsList(treeGroups, true);
     };
 
     public getPrivateGroupsUsers(groups: IGroup[]) {
-        return groups.reduce((users, group) => {
+        return groups.reduce((users: IEntity[], group) => {
             group.user && group.user.name !== this.currentUserName && users.push(group.user);
             return users;
         }, []);

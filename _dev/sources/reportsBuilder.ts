@@ -27,10 +27,10 @@ interface IGroup {
 }
 
 export interface IReportDependencies {
-    devices?: string[];
-    rules?: string[];
-    zoneTypes?: string[];
-    groups?: string[];
+    devices: string[];
+    rules: string[];
+    zoneTypes: string[];
+    groups: string[];
 }
 
 interface IReportTemplate {
@@ -145,7 +145,7 @@ export default class ReportsBuilder {
 
     public getData (): Promise<IReportTemplate[]> {
         let portionSize = 15,
-            portions = this.allTemplates.reduce((requests, template: IReportTemplate) => {
+            portions = this.allTemplates.reduce((requests: any[], template: IReportTemplate) => {
                 if (!template.isSystem && !template.binaryData) {
                     let portionIndex: number = requests.length - 1;
                     if (!requests[portionIndex] || requests[portionIndex].length >= portionSize) {
@@ -203,7 +203,7 @@ export default class ReportsBuilder {
     }
 
     public getCustomizedReportsQty (): number {
-        let templates = [];
+        let templates: string[] = [];
         return (this.allReports.filter((report: IReport) => {
             let templateId = report.template.id,
                 templateExists: boolean = templates.indexOf(templateId) > -1,

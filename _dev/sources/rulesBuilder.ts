@@ -8,15 +8,15 @@ interface IRule {
 }
 
 export interface IRuleDependencies {
-    devices?: any[];
-    users?: any[];
-    zones?: any[];
-    zoneTypes?: any[];
-    workTimes?: any[];
-    workHolidays?: any[];
-    groups?: any[];
-    securityGroups?: any[];
-    diagnostics?: any[];
+    devices: any[];
+    users: any[];
+    zones: any[];
+    zoneTypes: any[];
+    workTimes: any[];
+    workHolidays: any[];
+    groups: any[];
+    securityGroups: any[];
+    diagnostics: any[];
 }
 
 const APPLICATION_RULE_ID = "RuleApplicationExceptionId";
@@ -49,17 +49,20 @@ export default class RulesBuilder {
     }
 
     public getDependencies (rules): IRuleDependencies {
-        let dependencies = {
+        let dependencies: IRuleDependencies = {
                 devices: [],
                 users: [],
                 zones: [],
                 zoneTypes: [],
                 workTimes: [],
+                workHolidays: [],
                 groups: [],
-                diagnostics: []
+                diagnostics: [],
+                securityGroups: []
             },
             processDependencies = (condition) => {
-                let id, type: string;
+                let id: string | undefined = undefined;
+                let type: string | undefined = undefined;
                 switch (condition.conditionType) {
                     case "RuleWorkHours":
                     case "AfterRuleWorkHours":

@@ -96,7 +96,7 @@ export class MiscBuilder {
                         }]
                     ], resolve, reject);
             });
-        }).then((result) => {
+        }).then((result: any) => {
             let currentUser = result[0][0] || result[0],
                 systemSettings = result[1][0] || result[1],
                 userMapProviderId = currentUser.defaultMapEngine,

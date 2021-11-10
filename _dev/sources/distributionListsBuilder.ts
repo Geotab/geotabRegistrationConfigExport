@@ -10,16 +10,16 @@ interface IDistributionList {
 }
 
 export interface IDistributionListDependencies {
-    rules?: any[];
-    users?: any[];
-    notificationTemplates?: any[];
-    groups?: any[];
+    rules: any[];
+    users: any[];
+    notificationTemplates: any[];
+    groups: any[];
 }
 
 export default class DistributionListsBuilder {
     private api;
     private currentTask;
-    private distributionLists;
+    private distributionLists: Record<string, IDistributionList>;
     private notificationTemplates;
 
     constructor(api) {
@@ -53,8 +53,9 @@ export default class DistributionListsBuilder {
                 notificationTemplates: []
             },
             processDependencies = (recipient) => {
-                let id, type: string,
-                    userId = recipient.user.id;
+                let id: string | undefined = undefined;
+                let type: string | undefined = undefined;
+                let userId = recipient.user.id;
                 userId && dependencies.users.indexOf(userId) === -1 && dependencies.users.push(userId);
                 switch (recipient.recipientType) {
                     case "Email":
@@ -108,7 +109,7 @@ export default class DistributionListsBuilder {
     };
 
     public getRulesDistributionLists (rulesIds: string[]): IDistributionList[] {
-        return Object.keys(this.distributionLists).reduce((res, id) => {
+        return Object.keys(this.distributionLists).reduce((res: IDistributionList[], id) => {
             let list = this.distributionLists[id];
             list.rules.some(listRule => rulesIds.indexOf(listRule.id) > -1) && res.push(list);
             return res;

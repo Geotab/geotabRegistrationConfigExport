@@ -123,16 +123,12 @@ export function sortArrayOfEntities(entities: any[], sortingFields: ISortPropert
 export function downloadDataAsFile(data: string, filename: string, mimeType = "text/json") {
     let blob = new Blob([data], {type: mimeType}),
         elem;
-    if (window.navigator.msSaveOrOpenBlob) {
-        window.navigator.msSaveBlob(blob, filename);
-    } else {
-        elem = window.document.createElement("a");
-        elem.href = window.URL.createObjectURL(blob);
-        elem.download = filename;
-        document.body.appendChild(elem);
-        elem.click();
-        document.body.removeChild(elem);
-    }
+    elem = window.document.createElement("a");
+    elem.href = window.URL.createObjectURL(blob);
+    elem.download = filename;
+    document.body.appendChild(elem);
+    elem.click();
+    document.body.removeChild(elem);
 }
 
 export function mergeUniqueEntities (...sources: IEntity[][]): IEntity[] {
@@ -148,7 +144,7 @@ export function mergeUniqueEntities (...sources: IEntity[][]): IEntity[] {
 }
 
 export function getEntitiesIds (entitiesList: IEntity[]): string[] {
-    return Array.isArray(entitiesList) && entitiesList.reduce((result, entity) => {
+    return Array.isArray(entitiesList) && entitiesList.reduce((result: string[], entity) => {
         entity && entity.id && result.push(entity.id);
         return result;
     }, []) || [];
@@ -166,14 +162,14 @@ export function mergeUnique (...sources: string[][]): string[] {
 
 export function getUniqueEntities (newEntities: IEntity[], existedEntities: IEntity[]): IEntity[] {
     let selectedEntitiesHash = entityToDictionary(existedEntities);
-    return newEntities.reduce((res, entity) => {
+    return newEntities.reduce((res: IEntity[], entity) => {
         !selectedEntitiesHash[entity.id] && res.push(entity);
         return res;
     }, []);
 }
 
 export function together(promises: Promise<any>[]): Promise<any> {
-    let results = [],
+    let results: any[] = [],
         resultsCount = 0;
     results.length = promises.length;
     return new Promise((resolve, reject) => {
