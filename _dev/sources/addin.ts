@@ -260,7 +260,11 @@ class Addin {
                                             !result[entityType] && (result[entityType] = []);
                                             if (entityType === "workHolidays" && (!item.holidayGroup || (entitiesList.workHolidays || []).indexOf(item.holidayGroup.groupId) === -1)) {
                                                 return false;
-                                            } else if (entityType === "securityGroups") {
+                                            }
+                                            if (entityType === "workTimes" && !item.details) {
+                                                return false;
+                                            }
+                                            if (entityType === "securityGroups") {
                                                 if ((entitiesList.securityGroups || []).indexOf(item.id) > -1) {
                                                     result[entityType] = result[entityType].concat(this.groupsBuilder.getCustomGroupsData(entitiesList.securityGroups || [], items));
                                                     return result;
