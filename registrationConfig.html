@@ -7,85 +7,109 @@
     </head>
 <body>
 	<div id="addinContainer">
-        <div class="geotabPageHeader">
-            <h1 class="geotabPageName">Export registration config (beta)</h1>
+        <div class="geotabPageHeader geo-page-header">
+            <div class="geo-page-header__main-line">
+                <h1 class="geotabPageName geo-page-header__page-name">Export registration config</h1>
+            </div>
         </div>
-        <div class="geotabToolbar">
-            <button id="exportButton" class="geotabButton">Export</button>
-            <button id="saveButton" class="geotabButton">Save Changes</button>
+        <div class="geo-page-toolbar">
+            <button id="exportButton" class="geotabButton geo-button geo-button--action geo-page-toolbar__item">Export</button>
+            <button id="saveButton" class="geotabButton geo-button geo-page-toolbar__item">Refresh</button>
         </div>
-        <div class="geotabSecondaryFill">
+        <div class="help-notification alert alert--success">
             <p class="infoText"><b>Export:</b> executes the export and generates the <b>export.json</b> file.</p>
-            <p class="infoText"><b>Save Changes:</b> updates the export data to include any changes since the previous update.</p>
+            <p class="infoText"><b>Refresh:</b> updates the export data to include any changes since the previous update.</p>
             <p class="infoText">The text below each group name indicates the current export settings.</p>
-            <p class="infoText"><b>Note:</b> The checkbox selection changes will only be taken into account after the "Save Changes" button has been hit and not when the "Export" button has been hit.</p>
+            <p class="infoText"><b>Note:</b> The checkbox selection changes will only be taken into account after the "Refresh" button has been hit and not when the "Export" button has been hit.</p>
         </div>
-        <div id="exporedData">
-            <div id="exportedGroups">
-                <h2>Groups</h2>
-                <div class="description">You have <span class="bold">not configured any groups</span>.</div>
-            </div>
-            <div id="exportedSecurityClearances">
-                <h2>Security clearances</h2>
-                <div class="description">You have <span class="bold">not configured any security clearances</span>.</div>
-            </div>
-            <div id="exportedRules">
-                <h2>Rules</h2>
-                <div class="description">You have <span class="bold">not configured any rules</span>.</div>
-            </div>
-            <div id="exportedReports">
-                <h2>Customized reports</h2>
-                <div class="description">You have <span class="bold">not configured any Customized reports</span>.</div>
-            </div>
-            <div id="exportedDashboards">
-                <h2>Dashboards</h2>
-                <div class="description">You have <span class="bold">not configured any dashboards</span>.</div>
-            </div>
-            <div id="exportedMap">
-                <h2>Map</h2>
-                <div class="description">You have <span class="bold">not configured any map providers</span>.</div>
-            </div>
-            <div id="exportedAddins">
-                <h2>Addins</h2>
-                <div class="description">You have <span class="bold">not configured any addins</span>.</div>
-                <label id="exportAllAddins">
-                    <input id="export_all_addins_checkbox" value="export_all_addins" type="checkbox" class="checkboxStyle" checked>
-                    <span class="infoText">Export all addins</span>
-                    <p><b>Note:</b> Uncheck this box if you do not want to export all addins. If unchecked no addins at all will be exported...</p>
-                </label>
-            </div>
-            <!--
-            <div id="exportedUsers">
-                <h2>Users</h2>
-                <div class="description">You have <span class="bold">not exported any users</span>.</div>
-            </div>
-            -->
-            <div id="exportedZones">
-                <h2>Zones</h2>
-                <div class="description">You have <span class="bold">not exported any zones</span>.</div>
-                <label id="exportAllZones">
-                    <input id="export_all_zones_checkbox" value="export_all_zones" type="checkbox" class="checkboxStyle" checked>
-                    <span class="infoText">Export all zones</span>
-                    <p><b>Note:</b> Uncheck this box if you do not want to export all zones. If unchecked only zones linked (with dependencies) will be exported...</p>
-                </label>
-            </div>
-            <div id="exportSystemSettings">
-                <h2>System Settings</h2>
-                <div class="description">You have <span class="bold">not exported any system settings.</span>.</div>
-                <label id="exportSystemSettings">
-                    <input id="export_system_settings_checkbox" value="export_system_settings" type="checkbox" class="checkboxStyle" checked>
-                    <span class="infoText">Export System Settings</span>
-                    <p><b>Note:</b> Uncheck this box if you do not want to export these system settings</p>
-                    <ul> 
-                        <li>Purge</li>
-                        <li>Email sender name</li>
-                        <li>Are you a government organization?</li> 
-                        <li>Allow reseller access</li>
-                        <li>Display third-party apps</li>
-                        <li>Allow purchasing on marketplace</li>
-                    </ul>
-                </label>
-            </div>
+        <div class="list-builder">
+            <ul id="exporedData" class="list-builder__list">
+                <li id="exportedGroups" class="list-builder__row-item">
+                    <div class="list-builder__header">Groups</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not configured any groups</span>.</div>
+                    </div>
+                </li>
+                <li id="exportedSecurityClearances">
+                    <div class="list-builder__header">Security clearances</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not configured any security clearances</span>.</div>
+                    </div>
+                </li>
+                <li id="exportedRules">
+                    <div class="list-builder__header">Rules</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not configured any rules</span>.</div>
+                    </div>
+                </li>
+                <li id="exportedReports">
+                    <div class="list-builder__header">Customized reports</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not configured any Customized reports</span>.</div>
+                    </div>
+                </li>
+                <li id="exportedDashboards">
+                    <div class="list-builder__header">Dashboards</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not configured any dashboards</span>.</div>
+                    </div>
+                </li>
+                <li id="exportedMap">
+                    <div class="list-builder__header">Map</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not configured any map providers</span>.</div>
+                    </div>
+                </li>
+                <li id="exportedAddins">
+                    <div class="list-builder__header">Addins</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not configured any addins</span>.</div>
+                        <label id="exportAllAddins" class="geo-checkbox__label">
+                            <input id="export_all_addins_checkbox" value="export_all_addins" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
+                            <span class="geo-checkbox__label-text infoText">Export all addins</span>
+                        </label>
+                        <div class="alert"><b>Note:</b> Uncheck this box if you do not want to export all addins. If unchecked no addins at all will be exported...</div>
+                    </div>
+                </li>
+                <!--
+                <div id="exportedUsers">
+                    <h2>Users</h2>
+                    <div class="description">You have <span class="bold">not exported any users</span>.</div>
+                </div>
+                -->
+                <li id="exportedZones">
+                    <div class="list-builder__header">Zones</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not exported any zones</span>.</div>
+                        <label id="exportAllZones" class="geo-checkbox__label">
+                            <input id="export_all_zones_checkbox" value="export_all_zones" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
+                            <span class="geo-checkbox__label-text infoText">Export all zones</span>
+                        </label>
+                        <div class="alert"><b>Note:</b> Uncheck this box if you do not want to export all zones. If unchecked only zones linked (with dependencies) will be exported...</div>
+                    </div>
+                </li>
+                <li id="exportSystemSettings">
+                    <div class="list-builder__header">System Settings</div>
+                    <div class="list-builder__record">
+                        <div class="description">You have <span class="bold">not exported any system settings.</span>.</div>
+                        <label id="exportSystemSettings" class="geo-checkbox__label">
+                            <input id="export_system_settings_checkbox" value="export_system_settings" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
+                            <span class="geo-checkbox__label-text infoText">Export System Settings</span>
+                        </label>
+                        <div class="alert">
+                            <b>Note:</b> Uncheck this box if you do not want to export these system settings
+                            <ul>
+                                <li>Purge</li>
+                                <li>Email sender name</li>
+                                <li>Are you a government organization?</li>
+                                <li>Allow reseller access</li>
+                                <li>Display third-party apps</li>
+                                <li>Allow purchasing on marketplace</li>
+                            </ul>
+                        </div>
+                    </div>
+                </li>
+            </ul>
         </div>
 	</div>
     <div id="hasItemsMessageTemplate" style="display: none">You are exporting <span class="bold">{quantity}</span> {entity}.</div>
