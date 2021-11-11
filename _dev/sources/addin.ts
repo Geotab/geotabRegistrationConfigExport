@@ -65,8 +65,8 @@ class Addin {
     private readonly miscBuilder: MiscBuilder;
     // private readonly userBuilder: UserBuilder;
     private readonly zoneBuilder: ZoneBuilder;
-    private readonly exportBtn: HTMLElement = document.getElementById("exportButton") as HTMLElement;
-    private readonly saveBtn: HTMLElement = document.getElementById("saveButton") as HTMLElement;
+    private readonly exportBtn = document.getElementById("exportButton") as HTMLButtonElement;
+    private readonly saveBtn = document.getElementById("saveButton") as HTMLButtonElement;
     private readonly exportAllAddinsCheckbox: HTMLInputElement = document.getElementById("export_all_addins_checkbox") as HTMLInputElement;
     private readonly exportAllZonesCheckbox: HTMLInputElement = document.getElementById("export_all_zones_checkbox") as HTMLInputElement;
     private readonly exportSystemSettingsCheckbox: HTMLInputElement = document.getElementById("export_system_settings_checkbox") as HTMLInputElement;
@@ -328,7 +328,7 @@ class Addin {
     }
 
     private toggleExportButton (isDisabled: boolean) {
-        (<HTMLInputElement>this.exportBtn).disabled = isDisabled;
+        this.exportBtn.disabled = isDisabled;
     }
 
     private readonly toggleWaiting = (isStart = false) => {
@@ -398,11 +398,10 @@ class Addin {
 
     saveChanges = () => {
         this.render();
-        (<HTMLInputElement>this.exportBtn).disabled = false;
     }
 
     checkBoxValueChanged = () => {
-        (<HTMLInputElement>this.exportBtn).disabled = true;
+        this.toggleExportButton(true);
     }
 
     addEventHandlers() {
@@ -425,7 +424,7 @@ class Addin {
             reportsBlock: HTMLElement = document.getElementById("exportedReports") as HTMLElement,
             dashboardsBlock: HTMLElement = document.getElementById("exportedDashboards") as HTMLElement,
             addinsBlock: HTMLElement = document.getElementById("exportedAddins") as HTMLElement,
-            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap > .description") as HTMLElement,
+            mapBlockDescription: HTMLElement = document.querySelector("#exportedMap .description") as HTMLElement,
             // usersBlock: HTMLElement = document.getElementById("exportedUsers"),
             zonesBlock: HTMLElement = document.getElementById("exportedZones") as HTMLElement,
             systemSettingsBlock: HTMLElement = document.getElementById("exportSystemSettings") as HTMLElement;
