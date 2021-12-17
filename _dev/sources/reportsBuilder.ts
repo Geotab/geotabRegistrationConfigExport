@@ -1,13 +1,14 @@
 /// <reference path="../bluebird.d.ts"/>
+import { IGroup } from "./groupsBuilder";
 import * as Utils from "./utils";
 
 const REPORT_TYPE_DASHBOAD = "Dashboard";
 
-interface IReport {
-    id: string;
+interface IReport extends IIdEntity {
     groups: IGroup[];
     includeAllChildrenGroups: IGroup[];
     includeDirectChildrenOnlyGroups: IGroup[];
+    individualRecipients: IIdEntity[];
     scopeGroups: IGroup[];
     destination?: string;
     template: IReportTemplate;
@@ -21,20 +22,15 @@ interface IReport {
     [propName: string]: any;
 }
 
-interface IGroup {
-    id: string;
-    children: IGroup[];
-}
-
 export interface IReportDependencies {
     devices: string[];
     rules: string[];
     zoneTypes: string[];
     groups: string[];
+    users: string[];
 }
 
-interface IReportTemplate {
-    id: string;
+interface IReportTemplate extends IIdEntity {
     name: string;
     isSystem: boolean;
     reportDataSource: string;
@@ -127,13 +123,16 @@ export default class ReportsBuilder {
                 devices: [],
                 rules: [],
                 zoneTypes: [],
-                groups: []
+                groups: [],
+                users: []
             };
         return reports.reduce((reportsDependencies: IReportDependencies, template: IReportTemplate) => {
             return template.reports.reduce((templateDependecies, report) => {
                 templateDependecies.groups = Utils.mergeUnique(templateDependecies.groups, Utils.getEntitiesIds(report.groups),
                     Utils.getEntitiesIds(report.includeAllChildrenGroups), Utils.getEntitiesIds(report.includeDirectChildrenOnlyGroups),
                     Utils.getEntitiesIds(report.scopeGroups));
+                templateDependecies.users = Utils.mergeUnique(
+                    templateDependecies.users, report.individualRecipients && Utils.getEntitiesIds(report.individualRecipients) || []);
                 templateDependecies.devices = Utils.mergeUnique(templateDependecies.devices, report.arguments && report.arguments.devices && Utils.getEntitiesIds(report.arguments.devices) || []);
                 templateDependecies.rules = Utils.mergeUnique(templateDependecies.rules, report.arguments && report.arguments.rules && Utils.getEntitiesIds(report.arguments.rules) || []);
                 templateDependecies.zoneTypes = Utils.mergeUnique(

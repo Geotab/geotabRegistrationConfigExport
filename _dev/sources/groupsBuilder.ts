@@ -8,8 +8,7 @@ interface Color {
     a: number;
 }
 
-interface IGroup {
-    id: string;
+export interface IGroup extends IIdEntity {
     name?: string;
     color?: Color;
     parent?: IGroup;

@@ -1,10 +1,7 @@
-/// <reference path="../bluebird.d.ts"/>
 import {entityToDictionary, mergeUnique} from "./utils";
 
 //A distribution list links a set of Rule(s) to a set of Recipient(s). When a Rule is violated each related Recipient will receive a notification of the kind defined by its RecipientType.
-interface IDistributionList {
-    id: string;
-    name: string;
+interface IDistributionList extends INamedEntity {
     recipients: any[];
     rules: any[];
 }

@@ -1,8 +1,7 @@
 /// <reference path="../bluebird.d.ts"/>
 import { sortArrayOfEntities, entityToDictionary, mergeUnique } from "./utils";
 
-interface IRule {
-    id: string;
+interface IRule extends IIdEntity {
     groups: any[];
     condition: any;
 }
