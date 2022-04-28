@@ -1,15 +1,17 @@
 /// <reference path="../bluebird.d.ts"/>
 import { IGroup } from "./groupsBuilder";
+import { getFilterStateUniqueGroups, IScopeGroupFilter } from "./scopeGroupFilter";
 import * as Utils from "./utils";
 
 const REPORT_TYPE_DASHBOAD = "Dashboard";
 
-interface IReport extends IIdEntity {
+interface IServerReport extends IIdEntity {
     groups: IGroup[];
     includeAllChildrenGroups: IGroup[];
     includeDirectChildrenOnlyGroups: IGroup[];
     individualRecipients: IIdEntity[];
     scopeGroups: IGroup[];
+    scopeGroupFilter?: IIdEntity;
     destination?: string;
     template: IReportTemplate;
     lastModifiedUser;
@@ -20,6 +22,10 @@ interface IReport extends IIdEntity {
         [propName: string]: any;
     };
     [propName: string]: any;
+}
+
+interface IReport extends IServerReport {
+    scopeGroupFilter?: IScopeGroupFilter;
 }
 
 export interface IReportDependencies {
@@ -48,7 +54,6 @@ export default class ReportsBuilder {
     private dashboardsLength: number;
     private allTemplates: IReportTemplate[];
 
-    //GetReportSchedules is obsolete
     private getReports (): Promise<any> {
         return new Promise((resolve, reject) => {
             this.api.multiCall([
@@ -64,6 +69,32 @@ export default class ReportsBuilder {
                 }],
                 ["GetDashboardItems", {}]
             ], resolve, reject);
+        });
+    }
+
+    private populateScopeGroupFilters (reports: IServerReport[]): Promise<IReport[]> {
+        const requests = reports.reduce((res, report) => {
+            if (report.scopeGroupFilter && report.scopeGroupFilter.id) {
+                res.push(["Get", {
+                    "typeName": "GroupFilter",
+                    "search": {
+                        id: report.scopeGroupFilter.id
+                    }
+                }])
+            }
+            return res;
+        }, [] as any[]);
+        return new Promise((resolve, reject) => {
+            this.api.multiCall(requests, (groupFilters: IScopeGroupFilter[][]) => {
+                const enpackedFilter = groupFilters.map(item => Array.isArray(item) ? item[0] : item)
+                const scopeGroupFilterHash = Utils.entityToDictionary(enpackedFilter);
+                resolve(reports.map(report => {
+                    return {
+                        ...report,
+                        scopeGroupFilter: report.scopeGroupFilter && scopeGroupFilterHash[report.scopeGroupFilter.id]
+                    };
+                }));
+            }, reject);
         });
     }
 
@@ -104,6 +135,9 @@ export default class ReportsBuilder {
     public fetch (): Promise<any> {
         this.abortCurrentTask();
         this.currentTask = this.getReports()
+            .then(([reports, ...rest]) => {
+                return Promise.all([this.populateScopeGroupFilters(reports), ...rest])
+            })
             .then(([reports, templates, dashboardItems]) => {
                 this.allReports = reports;
                 this.allTemplates = templates;
@@ -128,9 +162,13 @@ export default class ReportsBuilder {
             };
         return reports.reduce((reportsDependencies: IReportDependencies, template: IReportTemplate) => {
             return template.reports.reduce((templateDependecies, report) => {
-                templateDependecies.groups = Utils.mergeUnique(templateDependecies.groups, Utils.getEntitiesIds(report.groups),
-                    Utils.getEntitiesIds(report.includeAllChildrenGroups), Utils.getEntitiesIds(report.includeDirectChildrenOnlyGroups),
-                    Utils.getEntitiesIds(report.scopeGroups));
+                templateDependecies.groups =
+                    Utils.mergeUnique(templateDependecies.groups,
+                    Utils.getEntitiesIds(report.groups),
+                    Utils.getEntitiesIds(report.includeAllChildrenGroups),
+                    Utils.getEntitiesIds(report.includeDirectChildrenOnlyGroups),
+                    Utils.getEntitiesIds(report.scopeGroups),
+                    Utils.getEntitiesIds(report.scopeGroupFilter && getFilterStateUniqueGroups(report.scopeGroupFilter.groupFilterCondition) || []));
                 templateDependecies.users = Utils.mergeUnique(
                     templateDependecies.users, report.individualRecipients && Utils.getEntitiesIds(report.individualRecipients) || []);
                 templateDependecies.devices = Utils.mergeUnique(templateDependecies.devices, report.arguments && report.arguments.devices && Utils.getEntitiesIds(report.arguments.devices) || []);
