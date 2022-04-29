@@ -85,6 +85,10 @@ export default class ReportsBuilder {
             return res;
         }, [] as any[]);
         return new Promise((resolve, reject) => {
+            if (!requests.length) {
+                resolve(reports);
+                return;
+            }
             this.api.multiCall(requests, (groupFilters: IScopeGroupFilter[][]) => {
                 const enpackedFilter = groupFilters.map(item => Array.isArray(item) ? item[0] : item)
                 const scopeGroupFilterHash = Utils.entityToDictionary(enpackedFilter);
