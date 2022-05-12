@@ -86,7 +86,7 @@ export default class ReportsBuilder {
         }, [] as any[]);
         return new Promise((resolve, reject) => {
             if (!requests.length) {
-                resolve(reports);
+                resolve(reports as IReport[]);
                 return;
             }
             this.api.multiCall(requests, (groupFilters: IScopeGroupFilter[][]) => {
