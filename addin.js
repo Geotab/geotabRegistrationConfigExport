@@ -22,6 +22,7 @@ var utils_1 = require("./utils");
 var waiting_1 = require("./waiting");
 // import {UserBuilder} from "./userBuilder";
 var zoneBuilder_1 = require("./zoneBuilder");
+var addinBuilder_1 = require("./addinBuilder");
 var Addin = /** @class */ (function () {
     //initialize addin
     function Addin(api) {
@@ -46,6 +47,7 @@ var Addin = /** @class */ (function () {
             customMaps: [],
             diagnostics: [],
             misc: null,
+            addins: [],
             notificationTemplates: [],
             certificates: []
         };
@@ -88,6 +90,7 @@ var Addin = /** @class */ (function () {
         //TODO: Brett - left here as I will be introducing the user fetch soon
         // this.userBuilder = new UserBuilder(api);
         this.zoneBuilder = new zoneBuilder_1.ZoneBuilder(api);
+        this.addinBuilder = new addinBuilder_1.AddinBuilder(api);
         this.waiting = new waiting_1["default"]();
     }
     Addin.prototype.combineDependencies = function () {
@@ -108,7 +111,8 @@ var Addin = /** @class */ (function () {
             securityGroups: [],
             diagnostics: [],
             customMaps: [],
-            notificationTemplates: []
+            notificationTemplates: [],
+            addins: []
         };
         return Object.keys(total).reduce(function (dependencies, dependencyName) {
             dependencies[dependencyName] = utils_1.mergeUnique.apply(void 0, __spreadArray([dependencies[dependencyName]], allDependencies.map(function (entityDependencies) { return entityDependencies[dependencyName]; }), false));
@@ -135,6 +139,18 @@ var Addin = /** @class */ (function () {
             return data;
         }, []);
         data.customMaps = (0, utils_1.mergeUniqueEntities)(data.customMaps, customMapsData);
+    };
+    Addin.prototype.addNewAddins = function (addinIds, data) {
+        var _this = this;
+        if (!addinIds || !addinIds.length) {
+            return false;
+        }
+        var addinsData = addinIds.reduce(function (data, addinId) {
+            var addinData = _this.miscBuilder.getAddinsData(addinId);
+            addinData && data.push(addinData);
+            return data;
+        }, []);
+        data.addins = (0, utils_1.mergeUniqueEntities)(data.addins, addinsData);
     };
     Addin.prototype.addNewNotificationTemplates = function (notificationTemplatesIds, data) {
         var _this = this;
@@ -357,6 +373,7 @@ var Addin = /** @class */ (function () {
         //TODO: Brett - left here as I will be introducing the user fetch soon
         // this.data.users = [];
         this.data.zones = [];
+        this.data.addins = [];
         //wire up the dom
         var mapMessageTemplate = document.getElementById("mapMessageTemplate").innerHTML, groupsBlock = document.getElementById("exportedGroups"), securityClearancesBlock = document.getElementById("exportedSecurityClearances"), rulesBlock = document.getElementById("exportedRules"), reportsBlock = document.getElementById("exportedReports"), dashboardsBlock = document.getElementById("exportedDashboards"), addinsBlock = document.getElementById("exportedAddins"), mapBlockDescription = document.querySelector("#exportedMap .description"), 
         // usersBlock: HTMLElement = document.getElementById("exportedUsers"),
@@ -375,9 +392,10 @@ var Addin = /** @class */ (function () {
             this.miscBuilder.fetch(this.exportSystemSettingsCheckbox.checked),
             //TODO: Brett - left here as I will be introducing the user fetch soon
             // this.userBuilder.fetch(),
-            this.zoneBuilder.fetch()
+            this.zoneBuilder.fetch(),
+            this.addinBuilder.fetch()
         ]).then(function (results) {
-            var reportsDependencies, rulesDependencies, distributionListsDependencies, dependencies, customMap;
+            var reportsDependencies, rulesDependencies, distributionListsDependencies, dependencies, customMap, addins;
             _this.data.groups = results[0];
             _this.data.securityGroups = results[1];
             _this.data.reports = results[2];
@@ -397,13 +415,15 @@ var Addin = /** @class */ (function () {
                     _this.data.zones = results[6];
                     zoneDependencies = getDependencies(results[6], "zones");
                 }
-            }
-            if (_this.exportAllAddinsCheckbox.checked == false) {
-                //sets exported addins equal to none/empty array
-                _this.setAddinsToNull();
+            };
+            if (_this.exportAllAddinsCheckbox.checked == true) {
+                //sets exported addins equal to all database zones
+                _this.data.addins = results[7];
             }
             customMap = _this.data.misc && _this.miscBuilder.getMapProviderData(_this.data.misc.mapProvider.value);
             customMap && _this.data.customMaps.push(customMap);
+            //addins = _this.data.misc && _this.miscBuilder.getAddinsData(_this.data.misc.addin.value);
+            //addins && _this.data.addins.push(addins);
             reportsDependencies = _this.reportsBuilder.getDependencies(_this.data.reports);
             rulesDependencies = _this.rulesBuilder.getDependencies(_this.data.rules);
             distributionListsDependencies = _this.distributionListsBuilder.getDependencies(_this.data.distributionLists);
@@ -420,7 +440,8 @@ var Addin = /** @class */ (function () {
             if (mapProvider) {
                 mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider);
             }
-            _this.showEntityMessage(addinsBlock, ((_b = (_a = _this.data.misc) === null || _a === void 0 ? void 0 : _a.addins) === null || _b === void 0 ? void 0 : _b.length) || 0, "addin");
+            _this.showEntityMessage(addinsBlock, _this.data.addins.length, "addin");
+            //_this.showEntityMessage(addinsBlock, ((_b = (_a = _this.data.misc) === null || _a === void 0 ? void 0 : _a.addins) === null || _b === void 0 ? void 0 : _b.length) || 0, "addin");
             // this.showEntityMessage(usersBlock, this.data.users.length, "user");
             _this.showEntityMessage(zonesBlock, _this.data.zones.length, "zone");
             _this.showSystemSettingsMessage(systemSettingsBlock, _this.exportSystemSettingsCheckbox.checked);
@@ -464,7 +485,7 @@ geotab.addin.registrationConfig = function () {
     };
 };
 
-},{"./distributionListsBuilder":2,"./groupsBuilder":3,"./miscBuilder":4,"./reportsBuilder":5,"./rulesBuilder":6,"./securityClearancesBuilder":8,"./utils":9,"./waiting":10,"./zoneBuilder":11}],2:[function(require,module,exports){
+},{"./distributionListsBuilder":2,"./groupsBuilder":3,"./miscBuilder":4,"./reportsBuilder":5,"./rulesBuilder":6,"./securityClearancesBuilder":8,"./utils":9,"./waiting":10,"./zoneBuilder":11, "./addinBuilder":12}],2:[function(require,module,exports){
 "use strict";
 exports.__esModule = true;
 var utils_1 = require("./utils");
@@ -792,40 +813,7 @@ var MiscBuilder = /** @class */ (function () {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
     };
-    MiscBuilder.prototype.getAllowedAddins = function (allAddins) {
-        var _this = this;
-        return allAddins.filter(function (addin) {
-            //removes the current addin - registration config
-            if (_this.isCurrentAddin(addin)) {
-                return false;
-            }
-            var addinConfig = JSON.parse(addin);
-            if (addinConfig.items) {
-                //Multi line addin structure check
-                return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(function (item) {
-                    var url = item.url;
-                    return _this.isValidUrl(url);
-                });
-            }
-            else {
-                //Single line addin structure check
-                return _this.isValidUrl(addinConfig.url);
-            }
-        });
-    };
-    //Tests a URL for double slash. Accepts a url as a string as a argument.
-    //Returns true if the url contains a double slash //
-    //Returns false if the url does not contain a double slash.
-    MiscBuilder.prototype.isValidUrl = function (url) {
-        if (url && url.indexOf("\/\/") > -1) {
-            return true;
-        }
-        return false;
-    };
-    MiscBuilder.prototype.isCurrentAddin = function (addin) {
-        return ((addin.indexOf("Registration config") > -1) ||
-            (addin.toLowerCase().indexOf("registrationConfig".toLowerCase()) > -1));
-    };
+
     //fills the Misc builder (system settings) with the relevant information
     MiscBuilder.prototype.fetch = function (includeSysSettings) {
         var _this = this;
@@ -850,15 +838,14 @@ var MiscBuilder = /** @class */ (function () {
             _this.currentUser = currentUser;
             _this.customMapProviders = (0, utils_1.entityToDictionary)(systemSettings.customWebMapProviderList);
             _this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
-            _this.addins = _this.getAllowedAddins(systemSettings.customerPages);
+
             var output = {
                 mapProvider: {
                     value: mapProviderId,
                     type: _this.getMapProviderType(mapProviderId)
                 },
                 currentUser: _this.currentUser,
-                isUnsignedAddinsAllowed: _this.isUnsignedAddinsAllowed,
-                addins: _this.addins
+                isUnsignedAddinsAllowed: _this.isUnsignedAddinsAllowed
             };
             if (includeSysSettings) {
                 output.purgeSettings = systemSettings.purgeSettings;
@@ -1575,4 +1562,84 @@ var ZoneBuilder = /** @class */ (function () {
 }());
 exports.ZoneBuilder = ZoneBuilder;
 
+},{}],12:[function(require,module,exports){
+    "use strict";
+    //added by RavneetSandhu to manage adding all addins to the export as an option
+    exports.__esModule = true;
+    exports.AddinBuilder = void 0;
+    var AddinBuilder = /** @class */ (function () {
+        function AddinBuilder(api) {
+            this.api = api;
+        }
+        AddinBuilder.prototype.abortCurrentTask = function () {
+            this.currentTask && this.currentTask.abort && this.currentTask.abort();
+            this.currentTask = null;
+        };
+        AddinBuilder.prototype.fetch = function (includeSysSettings) {
+            var _this = this;
+            this.abortCurrentTask();
+            this.currentTask = new Promise(function (resolve, reject) {
+                _this.api.call("Get", {
+                            typeName: "AddIn"
+                        }, resolve, reject);
+            }).then(function (result) {
+                var addIns = result;
+                return _this.getAllowedAddins(addIns);
+            });
+            return this.currentTask;
+        };
+        AddinBuilder.prototype.getAllowedAddins = function (allAddins) {
+            var _this = this;
+            var filteredAddins = allAddins.filter(function (addin) {
+                //removes the current addin - registration config
+                if (_this.isCurrentAddin(addin)) {
+                    return false;
+                }
+                if(addin.url){
+                    return _this.isValidUrl(addin.url);
+                }
+                else{
+                    var addinConfig = addin.configuration;
+                    if (addinConfig.items) {
+                        //Multi line addin structure check
+                        return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(function (item) {
+                            var url = item.url;
+                            return _this.isValidUrl(url);
+                        });
+                    }
+                }
+            });
+            var addinUrls  = [];
+            filteredAddins.forEach((addin) => {
+                delete addin.id;
+                if(addin.url){
+                    delete addin.configuration;
+                    addinUrls.push(addin);
+                }
+                else{
+                    addinUrls.push(addin.configuration);
+                }
+                console.log(addinUrls);
+            });
+            return addinUrls;
+        };
+        //Tests a URL for double slash. Accepts a url as a string as a argument.
+        //Returns true if the url contains a double slash //
+        //Returns false if the url does not contain a double slash.
+        AddinBuilder.prototype.isValidUrl = function (url) {
+            if (url && url.indexOf("\/\/") > -1) {
+                return true;
+            }
+            return false;
+        };
+        AddinBuilder.prototype.isCurrentAddin = function (addin) {
+            return ((addin.configuration && addin.configuration.name == "Registration config") ||
+                (addin.name == "Registration config"));//support old format
+        };
+        AddinBuilder.prototype.unload = function () {
+            this.abortCurrentTask();
+        };
+        return AddinBuilder;
+    }());
+    exports.AddinBuilder = AddinBuilder;
 },{}]},{},[1]);
