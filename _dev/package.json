@@ -11,7 +11,7 @@
     "startServer": "node ../../../start.js",
     "watch": "watchify sources/addin.ts -p tsify --debug -o ../addin.js -dv",
     "build": "browserify sources/addin.ts -p tsify > ../addin.js",
-    "start": "start npm run startServer & start npm run watch"
+    "start": "npm run startServer & npm run watch"
   },
   "dependencies": {
     "browserify": "^17.0.0",

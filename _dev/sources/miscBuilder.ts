@@ -18,6 +18,26 @@ export interface IMiscData {
     isThirdPartyMarketplaceAppsAllowed?: boolean;
 }
 
+interface IAddinItem {
+    url?: string;
+    path?: string;
+    menuId?: string;
+    files?: any;
+    page?: string;
+    click?: string;
+    buttonName?: string;
+    mapScript?: {
+        src?: string;
+        style?: string;
+        url?: string; 
+    }
+}
+
+interface IAddin extends IAddinItem {
+    name?: string;
+    items?: IAddinItem[];
+}
+
 export class MiscBuilder {
     private readonly api;
     private customMapProviders;
@@ -36,6 +56,32 @@ export class MiscBuilder {
         this.currentTask = null;
     }
 
+    private isMenuItem = (item: IAddinItem): boolean => {
+        return !item.url && !!item.path && !!item.menuId;
+    }
+
+    //Tests a URL for double slash. Accepts a url as a string as a argument.
+    //Returns true if the url contains a double slash //
+    //Returns false if the url does not contain a double slash.
+    private isValidUrl = (url: string): boolean => !!url && url.indexOf("\/\/") > -1;
+
+    private isValidButton = (item: IAddinItem): boolean => !!item.buttonName && !!item.page && !!item.click && this.isValidUrl(item.click);
+
+    private isEmbeddedItem = (item: IAddinItem): boolean => !!item.files;
+
+    private isValidMapAddin = (item: IAddinItem): boolean => {
+        const scripts = item.mapScript;
+        const isValidSrc = !scripts?.src || this.isValidUrl(scripts.src);
+        const isValidStyle = !scripts?.style || this.isValidUrl(scripts.style);
+        const isValidHtml = !scripts?.url || this.isValidUrl(scripts.url);
+        const hasScripts = !!scripts && (!!scripts?.src || !scripts?.style || !scripts?.url);
+        return hasScripts && isValidSrc && isValidStyle && isValidHtml;
+    }
+
+    private isValidItem = (item: IAddinItem): boolean => {
+        return this.isEmbeddedItem(item) || this.isMenuItem(item) || this.isValidButton(item) || this.isValidMapAddin(item) || (!!item.url && this.isValidUrl(item.url));
+    }
+
     private getAllowedAddins (allAddins: string[]) {
         return allAddins.filter(addin => {
             //removes the current addin - registration config
@@ -43,30 +89,16 @@ export class MiscBuilder {
             {
                 return false;
             }
-            let addinConfig = JSON.parse(addin);
+            let addinConfig: IAddin = JSON.parse(addin);
             if(addinConfig.items) {
                 //Multi line addin structure check
-                return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
-                    let url = item.url;
-                    return this.isValidUrl(url);
-                });
+                return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(this.isValidItem);
             }
             else {
                 //Single line addin structure check
-                return this.isValidUrl(addinConfig.url);
+                return this.isValidItem(addinConfig);
             }
         });
-    }
-
-    //Tests a URL for double slash. Accepts a url as a string as a argument.
-    //Returns true if the url contains a double slash //
-    //Returns false if the url does not contain a double slash.
-    private isValidUrl(url: string): boolean {
-        if (url && url.indexOf("\/\/") > -1)
-        {
-            return true;
-        }
-        return false;
     }
 
     private isCurrentAddin (addin: string) {
