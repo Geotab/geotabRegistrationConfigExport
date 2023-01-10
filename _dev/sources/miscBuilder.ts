@@ -9,7 +9,6 @@ export interface IMiscData {
     };
     currentUser: any;
     isUnsignedAddinsAllowed: boolean;
-    addins: string[];
     purgeSettings?: any;
     emailSenderFrom?: string;
     customerClassification?: string;
@@ -18,25 +17,6 @@ export interface IMiscData {
     isThirdPartyMarketplaceAppsAllowed?: boolean;
 }
 
-interface IAddinItem {
-    url?: string;
-    path?: string;
-    menuId?: string;
-    files?: any;
-    page?: string;
-    click?: string;
-    buttonName?: string;
-    mapScript?: {
-        src?: string;
-        style?: string;
-        url?: string; 
-    }
-}
-
-interface IAddin extends IAddinItem {
-    name?: string;
-    items?: IAddinItem[];
-}
 
 export class MiscBuilder {
     private readonly api;
@@ -44,7 +24,6 @@ export class MiscBuilder {
     private currentTask;
     private currentUser;
     private isUnsignedAddinsAllowed;
-    private addins: string[];
     private readonly defaultMapProviders = {
         GoogleMaps: "Google Maps",
         Here: "HERE Maps",
@@ -54,56 +33,6 @@ export class MiscBuilder {
     private abortCurrentTask () {
         this.currentTask && this.currentTask.abort && this.currentTask.abort();
         this.currentTask = null;
-    }
-
-    private isMenuItem = (item: IAddinItem): boolean => {
-        return !item.url && !!item.path && !!item.menuId;
-    }
-
-    //Tests a URL for double slash. Accepts a url as a string as a argument.
-    //Returns true if the url contains a double slash //
-    //Returns false if the url does not contain a double slash.
-    private isValidUrl = (url: string): boolean => !!url && url.indexOf("\/\/") > -1;
-
-    private isValidButton = (item: IAddinItem): boolean => !!item.buttonName && !!item.page && !!item.click && this.isValidUrl(item.click);
-
-    private isEmbeddedItem = (item: IAddinItem): boolean => !!item.files;
-
-    private isValidMapAddin = (item: IAddinItem): boolean => {
-        const scripts = item.mapScript;
-        const isValidSrc = !scripts?.src || this.isValidUrl(scripts.src);
-        const isValidStyle = !scripts?.style || this.isValidUrl(scripts.style);
-        const isValidHtml = !scripts?.url || this.isValidUrl(scripts.url);
-        const hasScripts = !!scripts && (!!scripts?.src || !scripts?.style || !scripts?.url);
-        return hasScripts && isValidSrc && isValidStyle && isValidHtml;
-    }
-
-    private isValidItem = (item: IAddinItem): boolean => {
-        return this.isEmbeddedItem(item) || this.isMenuItem(item) || this.isValidButton(item) || this.isValidMapAddin(item) || (!!item.url && this.isValidUrl(item.url));
-    }
-
-    private getAllowedAddins (allAddins: string[]) {
-        return allAddins.filter(addin => {
-            //removes the current addin - registration config
-            if(this.isCurrentAddin(addin))
-            {
-                return false;
-            }
-            let addinConfig: IAddin = JSON.parse(addin);
-            if(addinConfig.items) {
-                //Multi line addin structure check
-                return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(this.isValidItem);
-            }
-            else {
-                //Single line addin structure check
-                return this.isValidItem(addinConfig);
-            }
-        });
-    }
-
-    private isCurrentAddin (addin: string) {
-        return ((addin.indexOf("Registration config") > -1)||
-        (addin.toLowerCase().indexOf("registrationConfig".toLowerCase()) > -1));
     }
 
     constructor(api) {
@@ -137,15 +66,13 @@ export class MiscBuilder {
             this.currentUser = currentUser;
             this.customMapProviders = entityToDictionary(systemSettings.customWebMapProviderList);
             this.isUnsignedAddinsAllowed = systemSettings.allowUnsignedAddIn;
-            this.addins = this.getAllowedAddins(systemSettings.customerPages);
             let output: IMiscData = {
                 mapProvider: {
                     value: mapProviderId,
                     type: this.getMapProviderType(mapProviderId)
                 },
                 currentUser: this.currentUser,
-                isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed,
-                addins: this.addins
+                isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed
             };
             if (includeSysSettings) {
                 output.purgeSettings = systemSettings.purgeSettings;
@@ -170,10 +97,6 @@ export class MiscBuilder {
 
     getMapProviderData (mapProviderId: string) {
         return mapProviderId && this.customMapProviders[mapProviderId];
-    }
-
-    getAddinsData (includeThisAddin = false) {
-        return !includeThisAddin ? this.addins.filter(addin => !this.isCurrentAddin(addin)) : this.addins;
     }
 
     unload (): void {
