@@ -531,6 +531,9 @@ var Addin = /** @class */ (function () {
                 if (results[7]) {
                     //sets exported addins equal to none/empty array
                     _this.data.addins = results[7];
+                    if (_this.data.misc) {
+                        _this.data.misc.addins = _this.data.addins;
+                    }
                 }
             }
             customMap = _this.data.misc && _this.miscBuilder.getMapProviderData(_this.data.misc.mapProvider.value);

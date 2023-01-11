@@ -477,6 +477,9 @@ class Addin {
                 if(results[7]){
                     //sets exported addins equal to none/empty array
                     this.data.addins = results[7];
+                    if(this.data.misc){
+                        this.data.misc.addins = this.data.addins;
+                    }
                 }
             }
             customMap = this.data.misc && this.miscBuilder.getMapProviderData(this.data.misc.mapProvider.value);

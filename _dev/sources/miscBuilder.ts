@@ -9,6 +9,7 @@ export interface IMiscData {
     };
     currentUser: any;
     isUnsignedAddinsAllowed: boolean;
+    addins: string[];
     purgeSettings?: any;
     emailSenderFrom?: string;
     customerClassification?: string;
@@ -71,6 +72,7 @@ export class MiscBuilder {
                     value: mapProviderId,
                     type: this.getMapProviderType(mapProviderId)
                 },
+                addins: [],
                 currentUser: this.currentUser,
                 isUnsignedAddinsAllowed: this.isUnsignedAddinsAllowed
             };
