@@ -11,6 +11,7 @@ import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUnique
 import Waiting from "./waiting";
 // import {UserBuilder} from "./userBuilder";
 import {ZoneBuilder} from "./zoneBuilder";
+import {AddInBuilder} from "./addInBuilder";
 
 interface Geotab {
     addin: {
@@ -33,6 +34,7 @@ interface IImportData {
     diagnostics: any[];
     customMaps: any[];
     misc: IMiscData | null;
+    addins: any[];
     notificationTemplates: any[];
     certificates: any[];
 }
@@ -66,6 +68,7 @@ class Addin {
     private readonly rulesBuilder: RulesBuilder;
     private readonly distributionListsBuilder: DistributionListsBuilder;
     private readonly miscBuilder: MiscBuilder;
+    private readonly addInBuilder: AddInBuilder;
     // private readonly userBuilder: UserBuilder;
     private readonly zoneBuilder: ZoneBuilder;
     private readonly exportBtn = document.getElementById("exportButton") as HTMLButtonElement;
@@ -90,6 +93,7 @@ class Addin {
         customMaps: [],
         diagnostics: [],
         misc: null,
+        addins: [],
         notificationTemplates: [],
         certificates: []
     };
@@ -365,12 +369,6 @@ class Addin {
         }
     }
 
-    private setAddinsToNull() {
-        if ((this.data.misc != null) || (this.data.misc != undefined)) {
-            this.data.misc.addins = [];
-        }
-    }
-
     //initialize addin
     constructor (api) {
         this.api = api;
@@ -383,6 +381,7 @@ class Addin {
         //TODO: Brett - left here as I will be introducing the user fetch soon
         // this.userBuilder = new UserBuilder(api);
         this.zoneBuilder = new ZoneBuilder(api);
+        this.addInBuilder = new AddInBuilder(api);
         this.waiting = new Waiting();
     }
 
@@ -419,6 +418,7 @@ class Addin {
         //TODO: Brett - left here as I will be introducing the user fetch soon
         // this.data.users = [];
         this.data.zones = [];
+        this.data.addins = [];
         //wire up the dom
         let mapMessageTemplate: string = (document.getElementById("mapMessageTemplate") as HTMLElement).innerHTML,
             groupsBlock: HTMLElement = document.getElementById("exportedGroups") as HTMLElement,
@@ -445,7 +445,8 @@ class Addin {
             this.miscBuilder.fetch(this.exportSystemSettingsCheckbox.checked),
             //TODO: Brett - left here as I will be introducing the user fetch soon
             // this.userBuilder.fetch(),
-            this.zoneBuilder.fetch()
+            this.zoneBuilder.fetch(),
+            this.addInBuilder.fetch()
         ]).then((results) => {
             let reportsDependencies: IDependencies,
                 rulesDependencies: IDependencies,
@@ -472,9 +473,14 @@ class Addin {
                     zoneDependencies = getDependencies(results[6], "zones");
                 }
             }
-            if(this.exportAllAddinsCheckbox.checked==false){
-                //sets exported addins equal to none/empty array
-                this.setAddinsToNull();
+            if(this.exportAllAddinsCheckbox.checked==true){
+                if(results[7]){
+                    //sets exported addins equal to none/empty array
+                    this.data.addins = results[7];
+                    if(this.data.misc){
+                        this.data.misc.addins = this.data.addins;
+                    }
+                }
             }
             customMap = this.data.misc && this.miscBuilder.getMapProviderData(this.data.misc.mapProvider.value);
             customMap && this.data.customMaps.push(customMap);
@@ -493,7 +499,7 @@ class Addin {
             if (mapProvider) {
                 mapBlockDescription.innerHTML = mapMessageTemplate.replace("{mapProvider}", mapProvider);
             }
-            this.showEntityMessage(addinsBlock, this.data.misc?.addins?.length || 0, "addin");
+            this.showEntityMessage(addinsBlock, this.data.addins?.length || 0, "addin");
             // this.showEntityMessage(usersBlock, this.data.users.length, "user");
             this.showEntityMessage(zonesBlock, this.data.zones.length, "zone");
             this.showSystemSettingsMessage(systemSettingsBlock, this.exportSystemSettingsCheckbox.checked);
@@ -513,6 +519,7 @@ class Addin {
         this.rulesBuilder.unload();
         this.distributionListsBuilder.unload();
         this.miscBuilder.unload();
+        this.addInBuilder.unload();
         this.exportBtn.removeEventListener("click", this.exportData, false);
         this.saveBtn.removeEventListener("click", this.saveChanges, false);
         this.exportAllAddinsCheckbox.removeEventListener("change", this.checkBoxValueChanged, false);
