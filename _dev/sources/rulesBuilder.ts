@@ -1,4 +1,5 @@
 /// <reference path="../bluebird.d.ts"/>
+/// <reference path="addin.d.ts"/>
 import { sortArrayOfEntities, entityToDictionary, mergeUnique } from "./utils";
 
 interface IRule extends IIdEntity {
@@ -24,13 +25,38 @@ export default class RulesBuilder {
     private readonly api;
     private currentTask;
     private combinedRules;
-    private structuredRules;
 
-    private getRules (): Promise<any> {
+    private getRuleDiagnosticsString (rule: IRule) {
+        return this.getDependencies([rule]).diagnostics.sort().join();
+    }
+
+    private getRules (): Promise<IRule[]> {
         return new Promise((resolve, reject) => {
-            this.api.call("Get", {
-                "typeName": "Rule"
-            }, resolve, reject);
+            this.api.multiCall([
+                ["Get", {
+                    "typeName": "Rule"
+                }],
+                ["Get", {
+                    typeName: "Rule",
+                    search: {
+                        baseType: "RouteBasedMaterialMgmt"
+                    }
+                }]
+            ], ([allRules, materialManagementRules]: [IRule[], IRule[]]) => {
+                // To get correct Service groups we need to update material management stock rules' groups from groups property of the corresponding rule with RouteBasedMaterialMgmt baseType
+                // The only possible method now to match Stock rule and rule with RouteBasedMaterialMgmt baseType is to match their diagnostics
+                const mmRulesGroups = materialManagementRules.reduce((res: Record<string, IIdEntity[]>, mmRule) => {
+                    const mmRuleDiagnostics = this.getRuleDiagnosticsString(mmRule);
+                    res[mmRuleDiagnostics] = mmRule.groups;
+                    return res;
+                }, {});
+                debugger
+                return resolve(allRules.map(rule => {
+                    const mmRuleDiagnostics = this.getRuleDiagnosticsString(rule);
+                    const correspondingMMRuleGroups = mmRulesGroups[mmRuleDiagnostics];
+                    return correspondingMMRuleGroups ? { ...rule, groups: correspondingMMRuleGroups } : rule;
+                }))
+            }, reject);
         });
     }
 
@@ -47,7 +73,7 @@ export default class RulesBuilder {
         this.api = api;
     }
 
-    public getDependencies (rules): IRuleDependencies {
+    public getDependencies (rules: IRule[]): IRuleDependencies {
         let dependencies: IRuleDependencies = {
                 devices: [],
                 users: [],
@@ -127,7 +153,6 @@ export default class RulesBuilder {
             .then((switchedOnRules) => {
                 this.combinedRules = entityToDictionary(switchedOnRules);
                 delete(this.combinedRules[APPLICATION_RULE_ID]);
-                this.structuredRules = this.structureRules(Object.keys(this.combinedRules).map(key => this.combinedRules[key]));
                 return Object.keys(this.combinedRules).map(ruleId => this.combinedRules[ruleId]);
             })
             .catch(console.error)
