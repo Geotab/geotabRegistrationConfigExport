@@ -50,7 +50,6 @@ export default class RulesBuilder {
                     res[mmRuleDiagnostics] = mmRule.groups;
                     return res;
                 }, {});
-                debugger
                 return resolve(allRules.map(rule => {
                     const mmRuleDiagnostics = this.getRuleDiagnosticsString(rule);
                     const correspondingMMRuleGroups = mmRulesGroups[mmRuleDiagnostics];
