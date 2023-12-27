@@ -7,7 +7,7 @@ import ReportsBuilder from "./reportsBuilder";
 import RulesBuilder from "./rulesBuilder";
 import DistributionListsBuilder from "./distributionListsBuilder";
 import {IMiscData, MiscBuilder} from "./miscBuilder";
-import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise} from "./utils";
+import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise, getGroupFilterGroups} from "./utils";
 import Waiting from "./waiting";
 // import {UserBuilder} from "./userBuilder";
 import {ZoneBuilder} from "./zoneBuilder";
@@ -166,20 +166,6 @@ class Addin {
         }, []);
     }
 
-    private isLeafGroupFilterCondition = (groupFilterCondition: TGroupFilterCondition): groupFilterCondition is ILeafGroupFilterCondition => {
-        return !!(groupFilterCondition as ILeafGroupFilterCondition).groupId;
-    }
-
-    private getGroupFilterGroups = (groupFilterCondition?: TGroupFilterCondition, prevGroupIds: Set<string> = new Set<string>()) => {
-        if (!groupFilterCondition) {
-            return prevGroupIds;
-        }
-        const groups: Set<string> = this.isLeafGroupFilterCondition(groupFilterCondition)
-            ? new Set([...prevGroupIds, groupFilterCondition.groupId])
-            : groupFilterCondition.groupFilterConditions.reduce((res, childGroupFilterCondition) => this.getGroupFilterGroups(childGroupFilterCondition, res), prevGroupIds);
-        return groups;
-    };
-
     private getEntityDependencies (entity: IEntity, entityType: TEntityType) {
         let entityDependencies: IDependencies = {};
         switch (entityType) {
@@ -205,7 +191,7 @@ class Addin {
                 entity["holidayGroup"].groupId && (entityDependencies.workHolidays = [entity["holidayGroup"].groupId]);
                 break;
             case "groupFilters":
-                entityDependencies.groups = [...this.getGroupFilterGroups((entity as IGroupFilter).groupFilterCondition).values()];
+                entityDependencies.groups = [...getGroupFilterGroups((entity as IGroupFilter).groupFilterCondition).values()];
                 break;
             default:
                 break;
