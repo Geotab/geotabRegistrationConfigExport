@@ -7,7 +7,7 @@ import ReportsBuilder from "./reportsBuilder";
 import RulesBuilder from "./rulesBuilder";
 import DistributionListsBuilder from "./distributionListsBuilder";
 import {IMiscData, MiscBuilder} from "./miscBuilder";
-import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise} from "./utils";
+import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise, getGroupFilterGroups} from "./utils";
 import Waiting from "./waiting";
 // import {UserBuilder} from "./userBuilder";
 import {ZoneBuilder} from "./zoneBuilder";
@@ -37,6 +37,7 @@ interface IImportData {
     addins: any[];
     notificationTemplates: any[];
     certificates: any[];
+    groupFilters?: any[];
 }
 interface IDependencies {
     groups?: string[];
@@ -54,6 +55,7 @@ interface IDependencies {
     customMaps?: string[];
     notificationTemplates?: string[];
     certificates?: string[];
+    groupFilters?: string[];
 }
 
 type TEntityType = keyof IImportData;
@@ -95,7 +97,8 @@ class Addin {
         misc: null,
         addins: [],
         notificationTemplates: [],
-        certificates: []
+        certificates: [],
+        groupFilters: []
     };
 
     private combineDependencies (...allDependencies: IDependencies[]): IDependencies {
@@ -112,7 +115,8 @@ class Addin {
             securityGroups: [],
             diagnostics: [],
             customMaps: [],
-            notificationTemplates: []
+            notificationTemplates: [],
+            groupFilters: []
         };
         return Object.keys(total).reduce((dependencies, dependencyName: string) => {
             dependencies[dependencyName] = mergeUnique(dependencies[dependencyName], ...allDependencies.map((entityDependencies) => entityDependencies[dependencyName]));
@@ -176,6 +180,7 @@ class Addin {
                 if (entity.issuerCertificate) {
                     entityDependencies.certificates = [ entity.issuerCertificate.id ]
                 }
+                entityDependencies.groupFilters = this.getEntytiesIds([entity["accessGroupFilter"]]);
                 break;
             case "zones":
                 let zoneTypes = this.getEntytiesIds(entity["zoneTypes"]);
@@ -184,6 +189,9 @@ class Addin {
                 break;
             case "workTimes":
                 entity["holidayGroup"].groupId && (entityDependencies.workHolidays = [entity["holidayGroup"].groupId]);
+                break;
+            case "groupFilters":
+                entityDependencies.groups = [...getGroupFilterGroups((entity as IGroupFilter).groupFilterCondition).values()];
                 break;
             default:
                 break;
@@ -212,7 +220,8 @@ class Addin {
                         workHolidays: "WorkHoliday",
                         securityGroups: "Group",
                         diagnostics: "Diagnostic",
-                        certificates: "Certificate"
+                        certificates: "Certificate",
+                        groupFilters: "GroupFilter"
                     },
                     requests: any = this.applyToEntities(entitiesList, {}, (result, entityId, entityType) => {
                         let request = {

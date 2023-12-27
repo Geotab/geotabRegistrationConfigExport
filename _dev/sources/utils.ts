@@ -198,3 +198,17 @@ export function resolvedPromise<T> (val?: T): Promise<T> {
 export function toArray (data) {
     return Array.isArray(data) ? data : [data];
 }
+
+const isLeafGroupFilterCondition = (groupFilterCondition: TGroupFilterCondition): groupFilterCondition is ILeafGroupFilterCondition => {
+    return !!(groupFilterCondition as ILeafGroupFilterCondition).groupId;
+}
+
+export const getGroupFilterGroups = (groupFilterCondition?: TGroupFilterCondition, prevGroupIds: Set<string> = new Set<string>()) => {
+    if (!groupFilterCondition) {
+        return prevGroupIds;
+    }
+    const groups: Set<string> = isLeafGroupFilterCondition(groupFilterCondition)
+        ? new Set([...prevGroupIds, groupFilterCondition.groupId])
+        : groupFilterCondition.groupFilterConditions.reduce((res, childGroupFilterCondition) => getGroupFilterGroups(childGroupFilterCondition, res), prevGroupIds);
+    return groups;
+};
