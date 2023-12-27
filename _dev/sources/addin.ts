@@ -37,6 +37,7 @@ interface IImportData {
     addins: any[];
     notificationTemplates: any[];
     certificates: any[];
+    groupFilters?: any[];
 }
 interface IDependencies {
     groups?: string[];
@@ -54,6 +55,7 @@ interface IDependencies {
     customMaps?: string[];
     notificationTemplates?: string[];
     certificates?: string[];
+    groupFilters?: string[];
 }
 
 type TEntityType = keyof IImportData;
@@ -95,7 +97,8 @@ class Addin {
         misc: null,
         addins: [],
         notificationTemplates: [],
-        certificates: []
+        certificates: [],
+        groupFilters: []
     };
 
     private combineDependencies (...allDependencies: IDependencies[]): IDependencies {
@@ -112,7 +115,8 @@ class Addin {
             securityGroups: [],
             diagnostics: [],
             customMaps: [],
-            notificationTemplates: []
+            notificationTemplates: [],
+            groupFilters: []
         };
         return Object.keys(total).reduce((dependencies, dependencyName: string) => {
             dependencies[dependencyName] = mergeUnique(dependencies[dependencyName], ...allDependencies.map((entityDependencies) => entityDependencies[dependencyName]));
@@ -162,6 +166,20 @@ class Addin {
         }, []);
     }
 
+    private isLeafGroupFilterCondition = (groupFilterCondition: TGroupFilterCondition): groupFilterCondition is ILeafGroupFilterCondition => {
+        return !!(groupFilterCondition as ILeafGroupFilterCondition).groupId;
+    }
+
+    private getGroupFilterGroups = (groupFilterCondition?: TGroupFilterCondition, prevGroupIds: Set<string> = new Set<string>()) => {
+        if (!groupFilterCondition) {
+            return prevGroupIds;
+        }
+        const groups: Set<string> = this.isLeafGroupFilterCondition(groupFilterCondition)
+            ? new Set([...prevGroupIds, groupFilterCondition.groupId])
+            : groupFilterCondition.groupFilterConditions.reduce((res, childGroupFilterCondition) => this.getGroupFilterGroups(childGroupFilterCondition, res), prevGroupIds);
+        return groups;
+    };
+
     private getEntityDependencies (entity: IEntity, entityType: TEntityType) {
         let entityDependencies: IDependencies = {};
         switch (entityType) {
@@ -176,6 +194,7 @@ class Addin {
                 if (entity.issuerCertificate) {
                     entityDependencies.certificates = [ entity.issuerCertificate.id ]
                 }
+                entityDependencies.groupFilters = this.getEntytiesIds([entity["accessGroupFilter"]]);
                 break;
             case "zones":
                 let zoneTypes = this.getEntytiesIds(entity["zoneTypes"]);
@@ -184,6 +203,9 @@ class Addin {
                 break;
             case "workTimes":
                 entity["holidayGroup"].groupId && (entityDependencies.workHolidays = [entity["holidayGroup"].groupId]);
+                break;
+            case "groupFilters":
+                entityDependencies.groups = [...this.getGroupFilterGroups((entity as IGroupFilter).groupFilterCondition).values()];
                 break;
             default:
                 break;
@@ -212,7 +234,8 @@ class Addin {
                         workHolidays: "WorkHoliday",
                         securityGroups: "Group",
                         diagnostics: "Diagnostic",
-                        certificates: "Certificate"
+                        certificates: "Certificate",
+                        groupFilters: "GroupFilter"
                     },
                     requests: any = this.applyToEntities(entitiesList, {}, (result, entityId, entityType) => {
                         let request = {
