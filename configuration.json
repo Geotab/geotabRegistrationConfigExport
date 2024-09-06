@@ -1,6 +1,6 @@
 {
     "name": "Registration config",
-    "supportEmail": "nickklimkovich@geotab.com",
+    "supportEmail": "support@geotab.com",
     "version": "1.0",
     "items": [{
             "url": "registrationConfig.html",

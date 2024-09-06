@@ -13,7 +13,7 @@ Install this add-in into MyGeotab application you want to export settings from. 
 ```
 {
 	"name": "Registration config",
-	"supportEmail": "nickklimkovich@geotab.com",
+	"supportEmail": "support@geotab.com",
 	"version": "1.0",
 	"items": [
 		{
