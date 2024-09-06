@@ -1,7 +1,6 @@
 {
   "name": "RegistrationConfig",
   "version": "0.0.1",
-  "author": "nickklimkovich@geotab.com",
   "description": "Tool for exporting default registration config in JSON file",
   "engines": {
     "node": ">=4.0.0"
