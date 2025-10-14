@@ -1355,7 +1355,21 @@ exports.default = SecurityClearancesBuilder;
 },{"./groupsBuilder":4,"./utils":10}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getGroupFilterGroups = exports.toArray = exports.resolvedPromise = exports.together = exports.getUniqueEntities = exports.mergeUnique = exports.getEntitiesIds = exports.mergeUniqueEntities = exports.downloadDataAsFile = exports.sortArrayOfEntities = exports.entityToDictionary = exports.extend = exports.hasClass = exports.addClass = exports.removeClass = void 0;
+exports.getGroupFilterGroups = void 0;
+exports.removeClass = removeClass;
+exports.addClass = addClass;
+exports.hasClass = hasClass;
+exports.extend = extend;
+exports.entityToDictionary = entityToDictionary;
+exports.sortArrayOfEntities = sortArrayOfEntities;
+exports.downloadDataAsFile = downloadDataAsFile;
+exports.mergeUniqueEntities = mergeUniqueEntities;
+exports.getEntitiesIds = getEntitiesIds;
+exports.mergeUnique = mergeUnique;
+exports.getUniqueEntities = getUniqueEntities;
+exports.together = together;
+exports.resolvedPromise = resolvedPromise;
+exports.toArray = toArray;
 /// <reference path="../bluebird.d.ts"/>
 let classNameCtrl = function (el) {
     var param = typeof el.className === "string" ? "className" : "baseVal";
@@ -1377,7 +1391,6 @@ function removeClass(el, name) {
     let classesStr = classNameCtrl(el).get(), classes = classesStr.split(" "), newClasses = classes.filter(classItem => classItem !== name);
     classNameCtrl(el).set(newClasses.join(" "));
 }
-exports.removeClass = removeClass;
 function addClass(el, name) {
     if (!el) {
         return;
@@ -1387,11 +1400,9 @@ function addClass(el, name) {
         classNameCtrl(el).set(classesStr + " " + name);
     }
 }
-exports.addClass = addClass;
 function hasClass(el, className) {
     return el && classNameCtrl(el).get().indexOf(className) !== -1;
 }
-exports.hasClass = hasClass;
 function extend(...args) {
     var length = args.length, src, srcKeys, srcAttr, fullCopy = false, resAttr, res = args[0], i = 1, j;
     if (typeof res === "boolean") {
@@ -1417,7 +1428,6 @@ function extend(...args) {
     }
     return res;
 }
-exports.extend = extend;
 function entityToDictionary(entities, entityCallback) {
     var entity, o = {}, i, l = entities.length;
     for (i = 0; i < l; i++) {
@@ -1428,7 +1438,6 @@ function entityToDictionary(entities, entityCallback) {
     }
     return o;
 }
-exports.entityToDictionary = entityToDictionary;
 function sortArrayOfEntities(entities, sortingFields) {
     let comparator = (prevItem, nextItem, properties, index = 0) => {
         if (properties.length <= index) {
@@ -1450,7 +1459,6 @@ function sortArrayOfEntities(entities, sortingFields) {
         return comparator(prevTemplate, nextTemplate, sortingFields);
     });
 }
-exports.sortArrayOfEntities = sortArrayOfEntities;
 function downloadDataAsFile(data, filename, mimeType = "text/json") {
     let blob = new Blob([data], { type: mimeType }), elem;
     elem = window.document.createElement("a");
@@ -1460,7 +1468,6 @@ function downloadDataAsFile(data, filename, mimeType = "text/json") {
     elem.click();
     document.body.removeChild(elem);
 }
-exports.downloadDataAsFile = downloadDataAsFile;
 function mergeUniqueEntities(...sources) {
     let addedIds = [], mergedItems = [];
     sources.forEach(source => source.forEach(item => {
@@ -1471,14 +1478,12 @@ function mergeUniqueEntities(...sources) {
     }));
     return mergedItems;
 }
-exports.mergeUniqueEntities = mergeUniqueEntities;
 function getEntitiesIds(entitiesList) {
     return Array.isArray(entitiesList) && entitiesList.reduce((result, entity) => {
         entity && entity.id && result.push(entity.id);
         return result;
     }, []) || [];
 }
-exports.getEntitiesIds = getEntitiesIds;
 function mergeUnique(...sources) {
     let mergedItems = [];
     sources.forEach(source => {
@@ -1488,7 +1493,6 @@ function mergeUnique(...sources) {
     });
     return mergedItems;
 }
-exports.mergeUnique = mergeUnique;
 function getUniqueEntities(newEntities, existedEntities) {
     let selectedEntitiesHash = entityToDictionary(existedEntities);
     return newEntities.reduce((res, entity) => {
@@ -1496,7 +1500,6 @@ function getUniqueEntities(newEntities, existedEntities) {
         return res;
     }, []);
 }
-exports.getUniqueEntities = getUniqueEntities;
 function together(promises) {
     let results = [], resultsCount = 0;
     results.length = promises.length;
@@ -1518,15 +1521,12 @@ function together(promises) {
         }) : resolveAll();
     });
 }
-exports.together = together;
 function resolvedPromise(val) {
     return new Promise(resolve => resolve(val));
 }
-exports.resolvedPromise = resolvedPromise;
 function toArray(data) {
     return Array.isArray(data) ? data : [data];
 }
-exports.toArray = toArray;
 const isLeafGroupFilterCondition = (groupFilterCondition) => {
     return !!groupFilterCondition.groupId;
 };
