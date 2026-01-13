@@ -441,22 +441,28 @@ class Addin {
             zonesBlock: HTMLElement = document.getElementById("exportedZones") as HTMLElement,
             systemSettingsBlock: HTMLElement = document.getElementById("exportSystemSettings") as HTMLElement;
         this.toggleWaiting(true);
-        return together([
-            //loads the groups. This is where users are added if they are linked to a group
-            this.groupsBuilder.fetch(),
-            //loads the security groups (security clearance in user admin in MyG)
-            this.securityClearancesBuilder.fetch(),
-            //report loader...seems obsolete to me
-            this.reportsBuilder.fetch(),
-            this.rulesBuilder.fetch(),
-            this.distributionListsBuilder.fetch(),
-            //misc = system settings
-            this.miscBuilder.fetch(this.exportSystemSettingsCheckbox.checked),
-            //TODO: Brett - left here as I will be introducing the user fetch soon
-            // this.userBuilder.fetch(),
-            this.zoneBuilder.fetch(),
-            this.addInBuilder.fetch()
-        ]).then((results) => {
+        const zonesQtyPromise = this.exportAllZonesCheckbox.checked==true ? this.zoneBuilder.getQty() : Promise.resolve(0);
+        return zonesQtyPromise.then((zonesQty) => {
+            if (zonesQty > 10000) {
+                alert("The number of zones in the database exceeds 10,000. Exporting all zones may take a long time and could potentially time out. We turned off the 'Export All Zones' option to prevent this.");
+                this.exportAllZonesCheckbox.checked = false;
+                this.exportAllZonesCheckbox.disabled = true;
+            }
+
+
+            return together([
+                this.groupsBuilder.fetch(),
+                this.securityClearancesBuilder.fetch(),
+                this.reportsBuilder.fetch(),
+                this.rulesBuilder.fetch(),
+                this.distributionListsBuilder.fetch(),
+                this.miscBuilder.fetch(this.exportSystemSettingsCheckbox.checked),
+                //TODO: Brett - left here as I will be introducing the user fetch soon
+                // this.userBuilder.fetch(),
+                this.zoneBuilder.fetch(),
+                this.addInBuilder.fetch()
+            ])
+        }).then((results) => {
             let reportsDependencies: IDependencies,
                 rulesDependencies: IDependencies,
                 distributionListsDependencies: IDependencies,
@@ -546,7 +552,6 @@ geotab.addin.registrationConfig = function () {
             callback();
         },
         focus: () => {
-            addin.render();
             addin.addEventHandlers();
         },
         blur: () => {

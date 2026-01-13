@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="geo-page-toolbar">
-            <button id="exportButton" class="geotabButton geo-button geo-button--action geo-page-toolbar__item">Export</button>
+            <button id="exportButton" class="geotabButton geo-button geo-button--action geo-page-toolbar__item" disabled>Export</button>
             <button id="saveButton" class="geotabButton geo-button geo-page-toolbar__item">Refresh</button>
         </div>
         <div class="help-notification alert alert--success">
@@ -83,7 +83,7 @@
                         <div class="description">You have <span class="bold">not exported any zones</span>.</div>
                         <label id="exportAllZones" class="geo-checkbox__label">
                             <input id="export_all_zones_checkbox" value="export_all_zones" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
-                            <span class="geo-checkbox__label-text infoText">Export all zones</span>
+                            <span class="geo-checkbox__label-text infoText">Export all zones <span class="geo-checkbox__label-text infoText-description">(disabled because there are more than 10000 zones in the database)</span></span>
                         </label>
                         <div class="alert"><b>Note:</b> Uncheck this box if you do not want to export all zones. If unchecked only zones linked (with dependencies) will be exported...</div>
                     </div>

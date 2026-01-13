@@ -62,3 +62,17 @@
     position: relative;
     overflow: hidden;
 }
+
+.infoText-description {
+    display: none;
+}
+
+#export_all_zones_checkbox:disabled + .infoText {
+    font-weight: normal;
+    color: #777;
+    margin-left: 5px;
+
+    & .infoText-description {
+        display: inline;
+    }
+}
