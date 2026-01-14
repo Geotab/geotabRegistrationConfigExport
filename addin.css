@@ -1,74 +1,101 @@
-/* Root Variables - Geotab Design System */
+/* Root Variables */
 :root {
-    --geotab-primary: #0076C0;
-    --geotab-primary-hover: #005A93;
-    --geotab-success: #0F9D58;
-    --geotab-warning: #F4B400;
-    --geotab-error: #DB4437;
-    --geotab-info: #4285F4;
+    --erc-color-primary: #0076C0;
+    --erc-color-primary-hover: #005A93;
+    --erc-color-success: #0F9D58;
+    --erc-color-warning: #F4B400;
+    --erc-color-error: #DB4437;
+    --erc-color-info: #4285F4;
     
-    --text-primary: #1A1A1A;
-    --text-secondary: #5F6368;
-    --text-disabled: #9AA0A6;
+    --erc-text-primary: #1A1A1A;
+    --erc-text-secondary: #5F6368;
+    --erc-text-disabled: #9AA0A6;
     
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #F8F9FA;
-    --bg-tertiary: #E8EAED;
+    --erc-bg-primary: #FFFFFF;
+    --erc-bg-secondary: #F8F9FA;
+    --erc-bg-tertiary: #E8EAED;
     
-    --border-light: #DADCE0;
-    --border-medium: #BDC1C6;
+    --erc-border-light: #DADCE0;
+    --erc-border-medium: #BDC1C6;
     
-    --shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.1), 0 1px 3px 1px rgba(60, 64, 67, 0.05);
-    --shadow-md: 0 1px 2px 0 rgba(60, 64, 67, 0.2), 0 2px 6px 2px rgba(60, 64, 67, 0.1);
-    --shadow-lg: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 4px 5px 0 rgba(0, 0, 0, 0.07), 0 1px 10px 0 rgba(0, 0, 0, 0.06);
+    --erc-shadow-sm: 0 1px 2px 0 rgba(60, 64, 67, 0.1), 0 1px 3px 1px rgba(60, 64, 67, 0.05);
+    --erc-shadow-md: 0 1px 2px 0 rgba(60, 64, 67, 0.2), 0 2px 6px 2px rgba(60, 64, 67, 0.1);
+    --erc-shadow-lg: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 4px 5px 0 rgba(0, 0, 0, 0.07), 0 1px 10px 0 rgba(0, 0, 0, 0.06);
     
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
+    --erc-radius-sm: 4px;
+    --erc-radius-md: 6px;
+    --erc-radius-lg: 8px;
     
-    --spacing-xs: 6px;
-    --spacing-sm: 8px;
-    --spacing-md: 10px;
-    --spacing-lg: 16px;
-    --spacing-xl: 20px;
+    --erc-spacing-xs: 4px;
+    --erc-spacing-sm: 6px;
+    --erc-spacing-md: 8px;
+    --erc-spacing-lg: 12px;
+    --erc-spacing-xl: 16px;
 }
 
-/* Waiting Spinner */
-.waiting {
+/* Waiting Component - Zenith Design System */
+.erc-waiting {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 9999;
 }
 
-.fader {
-    background-color: #000;
-    opacity: 0.2;
+.erc-waiting__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(31, 40, 51, 0.4);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.erc-waiting__spinner-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--erc-spacing-md);
+    z-index: 1;
+    justify-content: center;
+    height: 100%;
+}
+
+.erc-waiting__spinner {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.erc-waiting__spinner svg {
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(2px);
+    display: block;
 }
 
-@-webkit-keyframes spinner { 
-    from { -webkit-transform: rotate(0deg); } 
-    to { -webkit-transform: rotate(-360deg); }
+@keyframes erc-spinner-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-@keyframes spinner { 
-    from { transform: rotate(0deg); } 
-    to { transform: rotate(-360deg); }
+.erc-waiting__spinner-animation {
+    transform-origin: center;
+    animation: erc-spinner-rotate 1.4s linear infinite;
 }
 
-.spinner:not(:required) {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin: -24px 0 0 -24px;
-    width: 48px;
-    height: 48px;
-    opacity: 0.8;
-    background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20height%3D%2229%22%20width%3D%2228%22%3E%3Cg%20style%3D%22stroke%3A%230076C0%3Bstroke-width%3A4%3Bstroke-linecap%3Around%3B%22%20transform%3D%22matrix(.703%200%200%20.703%2014.156%2014.156)%22%3E%3Cline%20y1%3D%2211%22%20y2%3D%2218%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(30)%22%20y1%3D%2211%22%20opacity%3D%22.917%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(60)%22%20y1%3D%2211%22%20opacity%3D%22.835%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(90)%22%20y1%3D%2211%22%20opacity%3D%22.752%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(120)%22%20y1%3D%2211%22%20opacity%3D%22.669%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(150)%22%20y1%3D%2211%22%20opacity%3D%22.587%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(180)%22%20y1%3D%2211%22%20opacity%3D%22.504%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(210)%22%20y1%3D%2211%22%20opacity%3D%22.421%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(240)%22%20y1%3D%2211%22%20opacity%3D%22.339%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(270)%22%20y1%3D%2211%22%20opacity%3D%22.256%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(300)%22%20y1%3D%2211%22%20opacity%3D%22.174%22%2F%3E%3Cline%20y2%3D%2218%22%20transform%3D%22rotate(330)%22%20y1%3D%2211%22%20opacity%3D%22.091%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center no-repeat;
-    background-size: 48px;
-    min-height: 24px;
-    -webkit-animation: spinner 0.7s linear infinite;
-    animation: spinner 0.7s linear infinite;
+.erc-waiting__spinner-text {
+    font-size: 14px;
+    color: var(--erc-text-secondary);
+    font-weight: 500;
 }
 
 /* Typography */
@@ -78,54 +105,36 @@
 }
 
 .infoText {
-    color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 20px;
+    color: var(--erc-text-secondary);
+    font-size: 13px;
+    line-height: 18px;
 }
 
 /* Container */
 #addinContainer {
     position: relative;
     overflow: hidden;
-    background-color: var(--bg-secondary);
-    min-height: 100vh;
-    padding-bottom: var(--spacing-lg);
-}
-
-/* Page Header */
-.geotabPageHeader.geo-page-header {
-    background: var(--bg-primary);
-    padding: var(--spacing-lg) var(--spacing-xl);
-    border-bottom: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
-}
-
-.geo-page-header__page-name {
-    font-size: 28px;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin: 0;
-    letter-spacing: -0.5px;
+    padding-bottom: var(--erc-spacing-md);
 }
 
 /* Toolbar */
 .geo-page-toolbar {
     display: flex;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-xl);
-    background: var(--bg-primary);
-    border-bottom: 1px solid var(--border-light);
+    gap: var(--erc-spacing-sm);
+    padding: var(--erc-spacing-md) var(--erc-spacing-xl);
+    background: var(--erc-bg-primary);
+    border-bottom: 1px solid var(--erc-border-light);
 }
 
 .geo-button {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: var(--radius-sm);
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--erc-radius-sm);
     font-weight: 500;
-    font-size: 14px;
-    letter-spacing: 0.25px;
+    font-size: 13px;
+    letter-spacing: 0.2px;
     transition: all 0.2s ease;
     border: 1px solid transparent;
     cursor: pointer;
@@ -142,36 +151,36 @@
 }
 
 .geo-button--action {
-    background-color: var(--geotab-primary);
+    background-color: var(--erc-color-primary);
     color: white;
-    border-color: var(--geotab-primary);
+    border-color: var(--erc-color-primary);
 }
 
 .geo-button--action:hover:not(:disabled) {
-    background-color: var(--geotab-primary-hover);
-    border-color: var(--geotab-primary-hover);
-    box-shadow: var(--shadow-md);
+    background-color: var(--erc-color-primary-hover);
+    border-color: var(--erc-color-primary-hover);
+    box-shadow: var(--erc-shadow-md);
     color: white;
 }
 
 .geo-button--action:disabled {
-    background-color: var(--bg-tertiary);
-    color: var(--text-disabled);
-    border-color: var(--border-light);
+    background-color: var(--erc-bg-tertiary);
+    color: var(--erc-text-disabled);
+    border-color: var(--erc-border-light);
     cursor: not-allowed;
     opacity: 0.6;
 }
 
 .geo-button:not(.geo-button--action) {
-    background-color: var(--bg-primary);
-    color: var(--geotab-primary);
-    border-color: var(--border-medium);
+    background-color: var(--erc-bg-primary);
+    color: var(--erc-color-primary);
+    border-color: var(--erc-border-medium);
 }
 
 .geo-button:not(.geo-button--action):hover {
-    background-color: var(--bg-secondary);
-    border-color: var(--geotab-primary);
-    box-shadow: var(--shadow-sm);
+    background-color: var(--erc-bg-secondary);
+    border-color: var(--erc-color-primary);
+    box-shadow: var(--erc-shadow-sm);
 }
 
 .geo-button:not(.geo-button--action):hover .geo-button__icon {
@@ -180,34 +189,61 @@
 
 /* Alert */
 .alert {
-    padding: var(--spacing-sm);
+    padding: var(--erc-spacing-md);
     background-color: #FFF9E6;
-    border-left: 3px solid var(--geotab-warning);
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    color: var(--text-secondary);
+    border-left: 3px solid var(--erc-color-warning);
+    border-radius: var(--erc-radius-sm);
+    font-size: 12px;
+    color: var(--erc-text-secondary);
+    line-height: 17px;
+    margin-top: var(--erc-spacing-sm);
 }
 
 .alert b {
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--erc-text-primary);
+}
+
+.alert-list {
+    margin: var(--erc-spacing-sm) 0 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--erc-spacing-xs);
+}
+
+.alert-list__item {
+    display: flex;
+    align-items: center;
+    gap: var(--erc-spacing-xs);
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--erc-text-primary);
+    padding: 2px 0;
+}
+
+.alert-list__icon {
+    flex-shrink: 0;
+    color: var(--erc-color-warning);
+    opacity: 1;
 }
 
 /* Help Notification */
 .help-notification {
-    margin: var(--spacing-lg) var(--spacing-xl);
-    padding: var(--spacing-md);
+    margin: var(--erc-spacing-md) var(--erc-spacing-xl);
+    padding: var(--erc-spacing-md);
     background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
-    border-left: 4px solid var(--geotab-success);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    border-left: 3px solid var(--erc-color-success);
+    border-radius: var(--erc-radius-md);
+    box-shadow: var(--erc-shadow-sm);
 }
 
 .help-notification p {
-    margin: 0 0 var(--spacing-sm) 0;
-    color: var(--text-primary);
-    font-size: 14px;
-    line-height: 20px;
+    margin: 0 0 var(--erc-spacing-xs) 0;
+    color: var(--erc-text-primary);
+    font-size: 13px;
+    line-height: 18px;
 }
 
 .help-notification p:last-child {
@@ -216,58 +252,59 @@
 
 .help-notification b {
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--erc-text-primary);
 }
 
 /* List Builder */
-.list-builder {
-    padding: 0 var(--spacing-xl);
+.erc-list {
+    padding: 0 var(--erc-spacing-xl);
 }
 
-.list-builder__list {
+.erc-list__list {
     list-style: none;
     padding: 0;
-    margin: var(--spacing-lg) 0;
+    margin: var(--erc-spacing-md) 0;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--erc-spacing-sm);
+    border: none;
 }
 
-.list-builder__row-item {
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-light);
+.erc-list__row-item {
+    background: var(--erc-bg-primary);
+    border-radius: var(--erc-radius-lg);
+    border: 1px solid var(--erc-border-light);
     overflow: hidden;
     transition: all 0.2s ease;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--erc-shadow-sm);
 }
 
-.list-builder__row-item:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--border-medium);
+.erc-list__row-item:hover {
+    box-shadow: var(--erc-shadow-md);
+    border-color: var(--erc-border-medium);
 }
 
-.list-builder__header {
+.erc-list__header {
     background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 100%);
-    padding: var(--spacing-md) var(--spacing-lg);
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-light);
-    letter-spacing: 0.15px;
-    margin: 0;
-}
-
-.list-builder__record {
-    padding: var(--spacing-md) var(--spacing-lg);
-    margin: 0;
-}
-
-.list-builder__record .description {
-    margin: 0;
-    color: var(--text-secondary);
+    padding: var(--erc-spacing-sm) var(--erc-spacing-md);
     font-size: 14px;
-    line-height: 20px;
+    font-weight: 600;
+    color: var(--erc-text-primary);
+    border-bottom: 1px solid var(--erc-border-light);
+    letter-spacing: 0.1px;
+    margin: 0;
+}
+
+.erc-list__record {
+    padding: var(--erc-spacing-sm) var(--erc-spacing-md);
+    margin: 0;
+}
+
+.erc-list__record .description {
+    margin: 0 0 var(--erc-spacing-xs) 0;
+    color: var(--erc-text-secondary);
+    font-size: 13px;
+    line-height: 18px;
 }
 
 /* Checkbox Styles */
@@ -275,28 +312,28 @@
     display: flex;
     align-items: flex-start;
     cursor: pointer;
-    margin: var(--spacing-sm) 0;
-    padding: var(--spacing-sm);
-    border-radius: var(--radius-sm);
+    margin: var(--erc-spacing-xs) 0;
+    padding: var(--erc-spacing-xs) var(--erc-spacing-sm);
+    border-radius: var(--erc-radius-sm);
     transition: background-color 0.2s ease;
 }
 
 .geo-checkbox__label:hover {
-    background-color: var(--bg-secondary);
+    background-color: var(--erc-bg-secondary);
 }
 
 .geo-checkbox__box {
-    width: 18px;
-    height: 18px;
-    margin: 2px var(--spacing-sm) 0 0;
+    width: 16px;
+    height: 16px;
+    margin: 1px var(--erc-spacing-sm) 0 0;
     cursor: pointer;
-    accent-color: var(--geotab-primary);
+    accent-color: var(--erc-color-primary);
 }
 
 .geo-checkbox__label-text {
-    font-size: 14px;
-    color: var(--text-primary);
-    line-height: 20px;
+    font-size: 13px;
+    color: var(--erc-text-primary);
+    line-height: 18px;
 }
 
 .checkboxStyle {
@@ -314,13 +351,13 @@
 
 .infoText-description {
     display: none;
-    color: var(--text-disabled);
+    color: var(--erc-text-disabled);
     font-style: italic;
 }
 
 #export_all_zones_checkbox:disabled + .infoText {
     font-weight: normal;
-    color: var(--text-disabled);
+    color: var(--erc-text-disabled);
     margin-left: 5px;
 }
 
@@ -330,10 +367,10 @@
 
 /* Footer Menu */
 .footer-menu {
-    padding: var(--spacing-md);
+    padding: var(--erc-spacing-md);
     position: sticky;
     bottom: 0;
-    background: var(--bg-primary);
+    background: var(--erc-bg-primary);
     box-shadow: 0 -2px 8px 0 rgba(60, 64, 67, 0.15);
-    border-top: 1px solid var(--border-light);
+    border-top: 1px solid var(--erc-border-light);
 }

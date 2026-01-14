@@ -15,14 +15,14 @@
             </div>
         </header>
         <nav class="geo-page-toolbar" role="toolbar">
-            <button id="exportButton" class="geotabButton geo-button geo-button--action geo-page-toolbar__item" disabled aria-label="Export configuration">
+            <button id="exportButton" class="geo-button geo-button--action geo-page-toolbar__item" disabled aria-label="Export configuration">
                 <svg class="geo-button__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14 11V14H2V11H0V14C0 15.1 0.9 16 2 16H14C15.1 16 16 15.1 16 14V11H14Z" fill="currentColor"/>
                     <path d="M13 7L11.59 5.59L9 8.17V0H7V8.17L4.41 5.59L3 7L8 12L13 7Z" fill="currentColor"/>
                 </svg>
                 <span class="geo-button__text">Export</span>
             </button>
-            <button id="saveButton" class="geotabButton geo-button geo-page-toolbar__item" aria-label="Refresh data">
+            <button id="saveButton" class="geo-button geo-page-toolbar__item" aria-label="Refresh data">
                 <svg class="geo-button__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M13.65 2.35C12.2 0.9 10.21 0 8 0C3.58 0 0.01 3.58 0.01 8C0.01 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z" fill="currentColor"/>
                 </svg>
@@ -32,50 +32,48 @@
         <section class="help-notification alert alert--success" role="alert" aria-live="polite">
             <p class="infoText"><b>Export:</b> Executes the export and generates the <b>export.json</b> file.</p>
             <p class="infoText"><b>Refresh:</b> Updates the export data to include any changes since the previous update.</p>
-            <p class="infoText">The text below each section indicates the current export settings.</p>
-            <p class="infoText"><b>Note:</b> Checkbox selection changes will only be applied after clicking the <b>Refresh</b> button, not when clicking <b>Export</b>.</p>
         </section>
-        <main class="list-builder" role="main">
-            <ul id="exporedData" class="list-builder__list">
-                <li id="exportedGroups" class="list-builder__row-item">
-                    <h2 class="list-builder__header">Groups</h2>
-                    <div class="list-builder__record">
+        <main class="erc-list" role="main">
+            <ul id="exporedData" class="erc-list__list">
+                <li id="exportedGroups" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Groups</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not configured any groups</span>.</p>
                     </div>
                 </li>
-                <li id="exportedSecurityClearances" class="list-builder__row-item">
-                    <h2 class="list-builder__header">Security Clearances</h2>
-                    <div class="list-builder__record">
+                <li id="exportedSecurityClearances" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Security Clearances</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not configured any security clearances</span>.</p>
                     </div>
                 </li>
-                <li id="exportedRules" class="list-builder__row-item">
-                    <h2 class="list-builder__header">Rules</h2>
-                    <div class="list-builder__record">
+                <li id="exportedRules" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Rules</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not configured any rules</span>.</p>
                     </div>
                 </li>
-                <li id="exportedReports" class="list-builder__row-item">
-                    <h2 class="list-builder__header">Customized Reports</h2>
-                    <div class="list-builder__record">
+                <li id="exportedReports" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Customized Reports</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not configured any customized reports</span>.</p>
                     </div>
                 </li>
-                <li id="exportedDashboards" class="list-builder__row-item">
-                    <h2 class="list-builder__header">Dashboards</h2>
-                    <div class="list-builder__record">
+                <li id="exportedDashboards" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Dashboards</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not configured any dashboards</span>.</p>
                     </div>
                 </li>
-                <li id="exportedMap" class="list-builder__row-item">
-                    <h2 class="list-builder__header">Map</h2>
-                    <div class="list-builder__record">
+                <li id="exportedMap" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Map</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not configured any map providers</span>.</p>
                     </div>
                 </li>
-                <li id="exportedAddins" class="list-builder__row-item">
-                    <h2 class="list-builder__header">Add-Ins</h2>
-                    <div class="list-builder__record">
+                <li id="exportedAddins" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Add-Ins</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not configured any add-ins</span>.</p>
                         <label id="exportAllAddins" class="geo-checkbox__label">
                             <input id="export_all_addins_checkbox" value="export_all_addins" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
@@ -90,9 +88,9 @@
                     <div class="description">You have <span class="bold">not exported any users</span>.</div>
                 </div>
                 -->
-                <li id="exportedZones" class="list-builder__row-item">
-                    <h2 class="list-builder__header">Zones</h2>
-                    <div class="list-builder__record">
+                <li id="exportedZones" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Zones</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not exported any zones</span>.</p>
                         <label id="exportAllZones" class="geo-checkbox__label">
                             <input id="export_all_zones_checkbox" value="export_all_zones" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
@@ -101,9 +99,9 @@
                         <div class="alert"><b>Note:</b> Uncheck this box if you do not want to export all zones. If unchecked, only zones with dependencies will be exported.</div>
                     </div>
                 </li>
-                <li id="exportSystemSettings" class="list-builder__row-item">
-                    <h2 class="list-builder__header">System Settings</h2>
-                    <div class="list-builder__record">
+                <li id="exportSystemSettings" class="erc-list__row-item">
+                    <h2 class="erc-list__header">System Settings</h2>
+                    <div class="erc-list__record">
                         <p class="description">You have <span class="bold">not exported any system settings</span>.</p>
                         <label id="exportSystemSettingsLabel" class="geo-checkbox__label">
                             <input id="export_system_settings_checkbox" value="export_system_settings" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
@@ -111,13 +109,43 @@
                         </label>
                         <div class="alert">
                             <b>Note:</b> Uncheck this box if you do not want to export these system settings:
-                            <ul>
-                                <li>Purge</li>
-                                <li>Email sender name</li>
-                                <li>Are you a government organization?</li>
-                                <li>Allow reseller access</li>
-                                <li>Display third-party apps</li>
-                                <li>Allow purchasing on marketplace</li>
+                            <ul class="alert-list">
+                                <li class="alert-list__item">
+                                    <svg class="alert-list__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.6667 3.5L5.25 9.91667L2.33333 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Purge
+                                </li>
+                                <li class="alert-list__item">
+                                    <svg class="alert-list__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.6667 3.5L5.25 9.91667L2.33333 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Email sender name
+                                </li>
+                                <li class="alert-list__item">
+                                    <svg class="alert-list__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.6667 3.5L5.25 9.91667L2.33333 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Are you a government organization?
+                                </li>
+                                <li class="alert-list__item">
+                                    <svg class="alert-list__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.6667 3.5L5.25 9.91667L2.33333 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Allow reseller access
+                                </li>
+                                <li class="alert-list__item">
+                                    <svg class="alert-list__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.6667 3.5L5.25 9.91667L2.33333 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Display third-party apps
+                                </li>
+                                <li class="alert-list__item">
+                                    <svg class="alert-list__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.6667 3.5L5.25 9.91667L2.33333 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Allow purchasing on marketplace
+                                </li>
                             </ul>
                         </div>
                     </div>
