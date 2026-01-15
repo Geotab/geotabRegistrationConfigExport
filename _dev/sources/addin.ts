@@ -265,6 +265,7 @@ class Addin {
                         if (!requestEntities.length) {
                             return resolve(data);
                         }
+
                         this.api.multiCall(requestsArray, (response) => {
                                 let newGroups: string[] = [],
                                     newCustomMaps: string[] = [],
@@ -443,8 +444,8 @@ class Addin {
         this.toggleWaiting(true);
         const zonesQtyPromise = this.exportAllZonesCheckbox.checked==true ? this.zoneBuilder.getQty() : Promise.resolve(0);
         return zonesQtyPromise.then((zonesQty) => {
-            if (zonesQty > 10000) {
-                alert("The number of zones in the database exceeds 10,000. Exporting all zones may take a long time and could potentially time out. We turned off the 'Export All Zones' option to prevent this.");
+            if (zonesQty > 5000) {
+                alert("The number of zones in the database exceeds 5,000. Exporting all zones may take a long time and could potentially time out. We turned off the 'Export All Zones' option to prevent this.");
                 this.exportAllZonesCheckbox.checked = false;
                 this.exportAllZonesCheckbox.disabled = true;
             }
