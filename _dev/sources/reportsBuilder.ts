@@ -2,6 +2,7 @@
 import { IGroup } from "./groupsBuilder";
 import { getFilterStateUniqueGroups, IScopeGroupFilter } from "./scopeGroupFilter";
 import * as Utils from "./utils";
+import { multiCall } from "./utils";
 
 const REPORT_TYPE_DASHBOAD = "Dashboard";
 
@@ -55,21 +56,19 @@ export default class ReportsBuilder {
     private allTemplates: IReportTemplate[];
 
     private getReports (): Promise<any> {
-        return new Promise((resolve, reject) => {
-            this.api.multiCall([
-                ["GetReportSchedules", {
-                    "includeTemplateDetails": true,
-                    "applyUserFilter": false
-                }],
-                ["Get", {
-                    "typeName": "ReportTemplate",
-                    "search": {
-                        includeBinaryData: false
-                    }
-                }],
-                ["GetDashboardItems", {}]
-            ], resolve, reject);
-        });
+        return multiCall(this.api, [
+            ["GetReportSchedules", {
+                "includeTemplateDetails": true,
+                "applyUserFilter": false
+            }],
+            ["Get", {
+                "typeName": "ReportTemplate",
+                "search": {
+                    includeBinaryData: false
+                }
+            }],
+            ["GetDashboardItems", {}]
+        ])
     }
 
     private populateScopeGroupFilters (reports: IServerReport[]): Promise<IReport[]> {
@@ -89,7 +88,7 @@ export default class ReportsBuilder {
                 resolve(reports as IReport[]);
                 return;
             }
-            this.api.multiCall(requests, (groupFilters: IScopeGroupFilter[][]) => {
+            multiCall(this.api, requests).then((groupFilters: IScopeGroupFilter[][]) => {
                 const enpackedFilter = groupFilters.map(item => Array.isArray(item) ? item[0] : item)
                 const scopeGroupFilterHash = Utils.entityToDictionary(enpackedFilter);
                 resolve(reports.map(report => {
@@ -205,9 +204,7 @@ export default class ReportsBuilder {
             }, []),
             totalResults: any[][] = [],
             getPortionData = portion => {
-                return new Promise<any>((resolve, reject) => {
-                    this.api.multiCall(portion, resolve, reject);
-                });
+                return multiCall(this.api, portion);
             },
             errorPortions = [];
 

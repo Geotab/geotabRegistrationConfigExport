@@ -1,4 +1,4 @@
-import {entityToDictionary, mergeUnique} from "./utils";
+import {entityToDictionary, IHash, mergeUnique, multiCall} from "./utils";
 
 //A distribution list links a set of Rule(s) to a set of Recipient(s). When a Rule is violated each related Recipient will receive a notification of the kind defined by its RecipientType.
 interface IDistributionList extends INamedEntity {
@@ -24,17 +24,16 @@ export default class DistributionListsBuilder {
     }
 
     //A distribution list links a set of Rule(s) to a set of Recipient(s). When a Rule is violated each related Recipient will receive a notification of the kind defined by its RecipientType.
-    private getDistributionListsData (): Promise<any> {
-        return new Promise((resolve, reject) => {
-            this.api.multiCall([
-                ["Get", {
-                    "typeName": "DistributionList",
-                }],
-                ["GetNotificationWebRequestTemplates", {}],
-                ["GetNotificationEmailTemplates", {}],
-                ["GetNotificationTextTemplates", {}]
-            ], resolve, reject);
-        });
+    private getDistributionListsData (): Promise<any[]> {
+        const requests: [string, IHash][] = [
+            ["Get", {
+                "typeName": "DistributionList",
+            }],
+            ["GetNotificationWebRequestTemplates", {}],
+            ["GetNotificationEmailTemplates", {}],
+            ["GetNotificationTextTemplates", {}]
+        ]
+        return multiCall(this.api, requests);
     };
 
     private abortCurrentTask (): void {

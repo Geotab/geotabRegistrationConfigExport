@@ -212,3 +212,28 @@ export const getGroupFilterGroups = (groupFilterCondition?: TGroupFilterConditio
         : groupFilterCondition.groupFilterConditions.reduce((res, childGroupFilterCondition) => getGroupFilterGroups(childGroupFilterCondition, res), prevGroupIds);
     return groups;
 };
+
+export const multiCall = (api: any, calls: [string, IHash][]): Promise<any[]> => {
+    const chunkSize = 7;
+    const chunks: [string, IHash][][] = [];
+    
+    for (let i = 0; i < calls.length; i += chunkSize) {
+        chunks.push(calls.slice(i, i + chunkSize));
+    }
+    
+    return Promise.all(
+        chunks.map(chunk => 
+            new Promise<any[]>((resolve, reject) => 
+                api.multiCall(chunk, resolve, reject)
+            )
+        )
+    ).then(results => results.flat());
+
+    // return Promise.all(calls.map(params => {
+    //     return new Promise((resolve, reject) => {
+    //         api.call(...params, resolve, reject);
+    //     });
+    // }));
+
+    // return api.multiCall(calls);
+}
