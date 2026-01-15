@@ -1,4 +1,4 @@
-import { entityToDictionary } from "./utils";
+import { entityToDictionary, IHash, multiCall } from "./utils";
 
 type TMapProviderType = "default" | "additional" | "custom";
 
@@ -46,17 +46,18 @@ export class MiscBuilder {
         this.currentTask = new Promise((resolve, reject) => {
             this.api.getSession((sessionData) => {
                 let userName = sessionData.userName;
-                this.api.multiCall([
-                        ["Get", {
-                            typeName: "User",
-                            search: {
-                                name: userName
-                            }
-                        }],
-                        ["Get", {
-                            typeName: "SystemSettings"
-                        }]
-                    ], resolve, reject);
+                const requests: [string, IHash][] = [
+                    ["Get", {
+                        typeName: "User",
+                        search: {
+                            name: userName
+                        }
+                    }],
+                    ["Get", {
+                        typeName: "SystemSettings"
+                    }]
+                ];
+                return multiCall(this.api, requests).then(resolve, reject);
             });
         }).then((result: any) => {
             let currentUser = result[0][0] || result[0],

@@ -7,7 +7,7 @@ import ReportsBuilder from "./reportsBuilder";
 import RulesBuilder from "./rulesBuilder";
 import DistributionListsBuilder from "./distributionListsBuilder";
 import {IMiscData, MiscBuilder} from "./miscBuilder";
-import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise, getGroupFilterGroups} from "./utils";
+import {downloadDataAsFile, mergeUnique, IEntity, mergeUniqueEntities, getUniqueEntities, getEntitiesIds, together, resolvedPromise, getGroupFilterGroups, multiCall} from "./utils";
 import Waiting from "./waiting";
 // import {UserBuilder} from "./userBuilder";
 import {ZoneBuilder} from "./zoneBuilder";
@@ -265,8 +265,8 @@ class Addin {
                         if (!requestEntities.length) {
                             return resolve(data);
                         }
-
-                        this.api.multiCall(requestsArray, (response) => {
+                        multiCall(this.api, requestsArray)
+                            .then((response) => {
                                 let newGroups: string[] = [],
                                     newCustomMaps: string[] = [],
                                     newDependencies: IDependencies = {},
@@ -444,14 +444,14 @@ class Addin {
         this.toggleWaiting(true);
         const zonesQtyPromise = this.exportAllZonesCheckbox.checked==true ? this.zoneBuilder.getQty() : Promise.resolve(0);
         return zonesQtyPromise.then((zonesQty) => {
-            if (zonesQty > 5000) {
-                alert("The number of zones in the database exceeds 5,000. Exporting all zones may take a long time and could potentially time out. We turned off the 'Export All Zones' option to prevent this.");
+            const maxZonesQty = 5000;
+            if (zonesQty > maxZonesQty) {
+                alert(`The number of zones in the database exceeds ${maxZonesQty}. Exporting all zones may take a long time and could potentially time out. We turned off the 'Export All Zones' option to prevent this.`);
                 this.exportAllZonesCheckbox.checked = false;
                 this.exportAllZonesCheckbox.disabled = true;
             }
-
-
-            return together([
+            // const start = performance.mark("start");
+            return Promise.all([
                 this.groupsBuilder.fetch(),
                 this.securityClearancesBuilder.fetch(),
                 this.reportsBuilder.fetch(),
@@ -506,6 +506,9 @@ class Addin {
             dependencies = this.combineDependencies(zoneDependencies, reportsDependencies, rulesDependencies, distributionListsDependencies);
             return this.resolveDependencies(dependencies, this.data);
         }).then(() => {
+            // performance.mark("end");
+            // performance.measure("resolveDependencies", "start", "end");
+            // console.log(performance.getEntriesByName("resolveDependencies"));
             let mapProvider = this.data.misc && this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
             this.showEntityMessage(groupsBlock, this.data.groups.length - 1, "group");
             this.showEntityMessage(securityClearancesBlock, this.data.securityGroups.length, "security clearance");

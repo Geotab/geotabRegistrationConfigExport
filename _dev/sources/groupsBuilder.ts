@@ -35,18 +35,21 @@ export default class GroupsBuilder {
     }
 
     //gets the groups associated with the current user
-    private getGroups (): Promise<any> {
+    private getGroups (): Promise<any[]> {
         return new Promise((resolve, reject) => {
             this.api.getSession((sessionData) => {
                 this.currentUserName = sessionData.userName;
-                this.api.multiCall([
-                    ["Get", {
+                const requests = [["Get", {
                         typeName: "Group"
                     }],
                     ["Get", {
                         typeName: "User"
-                    }]
-                ], resolve, reject);
+                    }]];
+                return Promise.all(requests.map(request => {
+                    return new Promise((resolve, reject) => {
+                        this.api.call(...request, resolve, reject);
+                    });
+                })).then(resolve, reject);
             });
         });
     };
