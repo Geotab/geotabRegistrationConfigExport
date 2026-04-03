@@ -1,4 +1,3 @@
-/// <reference path="../bluebird.d.ts"/>
 import { IGroup } from "./groupsBuilder";
 import { getFilterStateUniqueGroups, IScopeGroupFilter } from "./scopeGroupFilter";
 import * as Utils from "./utils";

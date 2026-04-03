@@ -4,12 +4,10 @@
 
 Exports groups, rules, reports, dashboards, map providers and addins (exports only configurations, so only addins with files located on remote servers will be exported) into json file that can be imported during registration process.
 
-### Dependencies
-* bluebird
-
 ## Installation
 
 Install this add-in into MyGeotab application you want to export settings from. Use configuration below:
+
 ```
 {
 	"name": "Registration config",
@@ -32,20 +30,21 @@ Install this add-in into MyGeotab application you want to export settings from. 
 
 Make sure you have [Node.js](https://nodejs.org/) installed.
 
-### Dependencies
-* browserify
-* tsify
-* watchify
-* MyGeotabDevTool (recommended)
+### Dev Dependencies
+
+- esbuild
+- typescript
+- MyGeotabDevTool (recommended)
 
 Get repo, copy it to MyGeotabDevTool/DevTool/addins/ folder and run:
-``` 
+
+```
 $> cd RegistrationConfig/_dev
 $> npm install
 $> npm start
 ```
 
-Source files are located in _dev/sources folder.
+Source files are located in \_dev/sources folder.
 
 ## LICENSE
 

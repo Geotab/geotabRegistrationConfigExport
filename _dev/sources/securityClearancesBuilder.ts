@@ -1,4 +1,3 @@
-/// <reference path="../bluebird.d.ts"/>
 import GroupsBuilder from "./groupsBuilder";
 import * as Utils from "./utils";
 

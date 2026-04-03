@@ -1,6 +1,10 @@
 {
-    "compilerOptions": {
-        "target": "ES2021",
-        "forceConsistentCasingInFileNames": true
-    }
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["./sources/**/*"]
 }
