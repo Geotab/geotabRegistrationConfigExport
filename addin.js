@@ -127,6 +127,13 @@
 
   // sources/groupsBuilder.ts
   var GroupsBuilder = class {
+    api;
+    currentTask;
+    groups;
+    tree;
+    currentTree;
+    users;
+    currentUserName;
     constructor(api) {
       this.api = api;
     }
@@ -354,6 +361,12 @@
 
   // sources/reportsBuilder.ts
   var ReportsBuilder = class {
+    api;
+    currentTask;
+    allReports;
+    structuredReports;
+    dashboardsLength;
+    allTemplates;
     getReports() {
       return multiCall(this.api, [
         ["GetReportSchedules", {
@@ -537,6 +550,9 @@
   // sources/rulesBuilder.ts
   var APPLICATION_RULE_ID = "RuleApplicationExceptionId";
   var RulesBuilder = class {
+    api;
+    currentTask;
+    combinedRules;
     getRuleDiagnosticsString(rule) {
       return this.getDependencies([rule]).diagnostics.sort().join();
     }
@@ -666,6 +682,10 @@
 
   // sources/distributionListsBuilder.ts
   var DistributionListsBuilder = class {
+    api;
+    currentTask;
+    distributionLists;
+    notificationTemplates;
     constructor(api) {
       this.api = api;
     }
@@ -754,17 +774,22 @@
 
   // sources/miscBuilder.ts
   var MiscBuilder = class {
-    constructor(api) {
-      this.defaultMapProviders = {
-        GoogleMaps: "Google Maps",
-        Here: "HERE Maps",
-        MapBox: "MapBox"
-      };
-      this.api = api;
-    }
+    api;
+    customMapProviders;
+    currentTask;
+    currentUser;
+    isUnsignedAddinsAllowed;
+    defaultMapProviders = {
+      GoogleMaps: "Google Maps",
+      Here: "HERE Maps",
+      MapBox: "MapBox"
+    };
     abortCurrentTask() {
       this.currentTask && this.currentTask.abort && this.currentTask.abort();
       this.currentTask = null;
+    }
+    constructor(api) {
+      this.api = api;
     }
     //fills the Misc builder (system settings) with the relevant information
     fetch(includeSysSettings) {
@@ -827,9 +852,8 @@
 
   // sources/waiting.ts
   var Waiting = class {
-    constructor() {
-      this.bodyEl = document.body;
-    }
+    waitingContainer;
+    bodyEl = document.body;
     start(el = this.bodyEl, zIndex) {
       if (el.offsetParent === null) {
         return false;
@@ -873,6 +897,8 @@
 
   // sources/zoneBuilder.ts
   var ZoneBuilder = class {
+    api;
+    currentTask;
     constructor(api) {
       this.api = api;
     }
@@ -914,29 +940,31 @@
 
   // sources/addInBuilder.ts
   var AddInBuilder = class {
+    api;
+    currentTask;
     constructor(api) {
-      this.isMenuItem = (item) => {
-        return !item.url && !!item.path && !!item.menuId;
-      };
-      //Tests a URL for double slash. Accepts a url as a string as a argument.
-      //Returns true if the url contains a double slash //
-      //Returns false if the url does not contain a double slash.
-      this.isValidUrl = (url) => !!url && url.indexOf("//") > -1;
-      this.isValidButton = (item) => !!item.buttonName && !!item.page && !!item.click && this.isValidUrl(item.click);
-      this.isEmbeddedItem = (item) => !!item.files;
-      this.isValidMapAddin = (item) => {
-        const scripts = item.mapScript;
-        const isValidSrc = !scripts?.src || this.isValidUrl(scripts.src);
-        const isValidStyle = !scripts?.style || this.isValidUrl(scripts.style);
-        const isValidHtml = !scripts?.url || this.isValidUrl(scripts.url);
-        const hasScripts = !!scripts && (!!scripts?.src || !scripts?.style || !scripts?.url);
-        return hasScripts && isValidSrc && isValidStyle && isValidHtml;
-      };
-      this.isValidItem = (item) => {
-        return this.isEmbeddedItem(item) || this.isMenuItem(item) || this.isValidButton(item) || this.isValidMapAddin(item) || !!item.url && this.isValidUrl(item.url);
-      };
       this.api = api;
     }
+    isMenuItem = (item) => {
+      return !item.url && !!item.path && !!item.menuId;
+    };
+    //Tests a URL for double slash. Accepts a url as a string as a argument.
+    //Returns true if the url contains a double slash //
+    //Returns false if the url does not contain a double slash.
+    isValidUrl = (url) => !!url && url.indexOf("//") > -1;
+    isValidButton = (item) => !!item.buttonName && !!item.page && !!item.click && this.isValidUrl(item.click);
+    isEmbeddedItem = (item) => !!item.files;
+    isValidMapAddin = (item) => {
+      const scripts = item.mapScript;
+      const isValidSrc = !scripts?.src || this.isValidUrl(scripts.src);
+      const isValidStyle = !scripts?.style || this.isValidUrl(scripts.style);
+      const isValidHtml = !scripts?.url || this.isValidUrl(scripts.url);
+      const hasScripts = !!scripts && (!!scripts?.src || !scripts?.style || !scripts?.url);
+      return hasScripts && isValidSrc && isValidStyle && isValidHtml;
+    };
+    isValidItem = (item) => {
+      return this.isEmbeddedItem(item) || this.isMenuItem(item) || this.isValidButton(item) || this.isValidMapAddin(item) || !!item.url && this.isValidUrl(item.url);
+    };
     isCurrentAddin(addin) {
       return addin.indexOf("Registration config") > -1 || addin.toLowerCase().indexOf("registrationConfig".toLowerCase()) > -1;
     }
@@ -1020,80 +1048,49 @@
 
   // sources/addin.ts
   var Addin = class {
-    //initialize addin
-    constructor(api) {
-      this.exportBtn = document.getElementById(
-        "exportButton"
-      );
-      this.saveBtn = document.getElementById(
-        "saveButton"
-      );
-      this.exportAllAddinsCheckbox = document.getElementById("export_all_addins_checkbox");
-      this.exportAllZonesCheckbox = document.getElementById("export_all_zones_checkbox");
-      this.exportSystemSettingsCheckbox = document.getElementById(
-        "export_system_settings_checkbox"
-      );
-      this.data = {
-        groups: [],
-        reports: [],
-        rules: [],
-        distributionLists: [],
-        devices: [],
-        users: [],
-        zoneTypes: [],
-        zones: [],
-        workTimes: [],
-        workHolidays: [],
-        securityGroups: [],
-        customMaps: [],
-        diagnostics: [],
-        misc: null,
-        addins: [],
-        notificationTemplates: [],
-        certificates: [],
-        groupFilters: []
-      };
-      this.toggleWaiting = (isStart = false) => {
-        if (isStart) {
-          this.toggleExportButton(true);
-          this.waiting.start(
-            document.getElementById("addinContainer").parentElement,
-            9999
-          );
-        } else {
-          this.toggleExportButton(false);
-          this.waiting.stop();
-        }
-      };
-      //Brett: exports the data
-      this.exportData = () => {
-        this.toggleWaiting(true);
-        return this.reportsBuilder.getData().then((reportsData) => {
-          this.data.reports = reportsData;
-          console.log(this.data);
-          downloadDataAsFile(JSON.stringify(this.data), "export.json");
-        }).catch((e) => {
-          alert("Can't export data.\nPlease try again later.");
-          console.error(e);
-        }).finally(() => this.toggleWaiting());
-      };
-      this.saveChanges = () => {
-        this.render();
-      };
-      this.checkBoxValueChanged = () => {
-        this.toggleExportButton(true);
-      };
-      this.api = api;
-      this.groupsBuilder = new GroupsBuilder(api);
-      this.securityClearancesBuilder = new SecurityClearancesBuilder(api);
-      this.reportsBuilder = new ReportsBuilder(api);
-      this.rulesBuilder = new RulesBuilder(api);
-      this.distributionListsBuilder = new DistributionListsBuilder(api);
-      this.miscBuilder = new MiscBuilder(api);
-      this.zoneBuilder = new ZoneBuilder(api);
-      this.addInBuilder = new AddInBuilder(api);
-      this.waiting = new Waiting();
-    }
+    api;
+    groupsBuilder;
+    securityClearancesBuilder;
+    reportsBuilder;
+    rulesBuilder;
+    distributionListsBuilder;
+    miscBuilder;
+    addInBuilder;
+    // private readonly userBuilder: UserBuilder;
+    zoneBuilder;
+    exportBtn = document.getElementById(
+      "exportButton"
+    );
+    saveBtn = document.getElementById(
+      "saveButton"
+    );
+    exportAllAddinsCheckbox = document.getElementById("export_all_addins_checkbox");
+    exportAllZonesCheckbox = document.getElementById("export_all_zones_checkbox");
+    exportSystemSettingsCheckbox = document.getElementById(
+      "export_system_settings_checkbox"
+    );
+    waiting;
+    currentTask;
+    data = {
+      groups: [],
+      reports: [],
+      rules: [],
+      distributionLists: [],
+      devices: [],
+      users: [],
+      zoneTypes: [],
+      zones: [],
+      workTimes: [],
+      workHolidays: [],
+      securityGroups: [],
+      customMaps: [],
+      diagnostics: [],
+      misc: null,
+      addins: [],
+      notificationTemplates: [],
+      certificates: [],
+      groupFilters: []
+    };
     combineDependencies(...allDependencies) {
       let total = {
         groups: [],
@@ -1415,6 +1412,18 @@
     toggleExportButton(isDisabled) {
       this.exportBtn.disabled = isDisabled;
     }
+    toggleWaiting = (isStart = false) => {
+      if (isStart) {
+        this.toggleExportButton(true);
+        this.waiting.start(
+          document.getElementById("addinContainer").parentElement,
+          9999
+        );
+      } else {
+        this.toggleExportButton(false);
+        this.waiting.stop();
+      }
+    };
     //Brett - displays the output on the page
     showEntityMessage(block, qty, entityName) {
       let blockEl = block.querySelector(".description");
@@ -1434,6 +1443,37 @@
         blockEl.innerHTML = "You have chosen <span class='bold'>not to include</span> system settings.";
       }
     }
+    //initialize addin
+    constructor(api) {
+      this.api = api;
+      this.groupsBuilder = new GroupsBuilder(api);
+      this.securityClearancesBuilder = new SecurityClearancesBuilder(api);
+      this.reportsBuilder = new ReportsBuilder(api);
+      this.rulesBuilder = new RulesBuilder(api);
+      this.distributionListsBuilder = new DistributionListsBuilder(api);
+      this.miscBuilder = new MiscBuilder(api);
+      this.zoneBuilder = new ZoneBuilder(api);
+      this.addInBuilder = new AddInBuilder(api);
+      this.waiting = new Waiting();
+    }
+    //Brett: exports the data
+    exportData = () => {
+      this.toggleWaiting(true);
+      return this.reportsBuilder.getData().then((reportsData) => {
+        this.data.reports = reportsData;
+        console.log(this.data);
+        downloadDataAsFile(JSON.stringify(this.data), "export.json");
+      }).catch((e) => {
+        alert("Can't export data.\nPlease try again later.");
+        console.error(e);
+      }).finally(() => this.toggleWaiting());
+    };
+    saveChanges = () => {
+      this.render();
+    };
+    checkBoxValueChanged = () => {
+      this.toggleExportButton(true);
+    };
     addEventHandlers() {
       this.exportBtn.addEventListener("click", this.exportData, false);
       this.saveBtn.addEventListener("click", this.saveChanges, false);

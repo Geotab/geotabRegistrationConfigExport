@@ -1,4 +1,3 @@
-/// <reference path="../bluebird.d.ts"/>
 
 const enum RelationOperator {
     "AND" = "And",

@@ -1,4 +1,3 @@
-/// <reference path="../bluebird.d.ts"/>
 interface IClassControl {
     get: () => string;
     set: (name: string) => void;

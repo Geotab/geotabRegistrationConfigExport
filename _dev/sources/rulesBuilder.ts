@@ -1,4 +1,3 @@
-/// <reference path="../bluebird.d.ts"/>
 /// <reference path="addin.d.ts"/>
 import { sortArrayOfEntities, entityToDictionary, mergeUnique, multiCall } from "./utils";
 

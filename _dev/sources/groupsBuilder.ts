@@ -1,4 +1,3 @@
-/// <reference path="../bluebird.d.ts"/>
 import { entityToDictionary, extend, IEntity } from "./utils";
 
 interface Color {

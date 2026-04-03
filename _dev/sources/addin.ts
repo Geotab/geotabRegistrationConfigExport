@@ -1,6 +1,3 @@
-/// <reference path="./addin.d.ts" />
-/// <reference path="../bluebird.d.ts"/>
-
 import GroupsBuilder from "./groupsBuilder";
 import SecurityClearancesBuilder from "./securityClearancesBuilder";
 import ReportsBuilder from "./reportsBuilder";
