@@ -20,6 +20,7 @@ import Waiting from "./waiting";
 // import {UserBuilder} from "./userBuilder";
 import { ZoneBuilder } from "./zoneBuilder";
 import { AddInBuilder } from "./addInBuilder";
+import { ClientSettingsBuilder } from "./clientSettingsBuilder";
 
 interface Geotab {
   addin: {
@@ -46,6 +47,7 @@ interface IImportData {
   notificationTemplates: any[];
   certificates: any[];
   groupFilters?: any[];
+  clientSettings: any[];
 }
 interface IDependencies {
   groups?: string[];
@@ -79,6 +81,7 @@ class Addin {
   private readonly distributionListsBuilder: DistributionListsBuilder;
   private readonly miscBuilder: MiscBuilder;
   private readonly addInBuilder: AddInBuilder;
+  private readonly clientSettingsBuilder: ClientSettingsBuilder;
   // private readonly userBuilder: UserBuilder;
   private readonly zoneBuilder: ZoneBuilder;
   private readonly exportBtn = document.getElementById(
@@ -94,6 +97,10 @@ class Addin {
   private readonly exportSystemSettingsCheckbox: HTMLInputElement =
     document.getElementById(
       "export_system_settings_checkbox",
+    ) as HTMLInputElement;
+  private readonly exportAllPinnedAppsCheckbox: HTMLInputElement =
+    document.getElementById(
+      "export_all_pinned_apps_checkbox",
     ) as HTMLInputElement;
   private readonly waiting: Waiting;
   private currentTask;
@@ -116,6 +123,7 @@ class Addin {
     notificationTemplates: [],
     certificates: [],
     groupFilters: [],
+    clientSettings: [],
   };
 
   private combineDependencies(
@@ -536,6 +544,16 @@ class Addin {
     }
   }
 
+  private showClientSettingsMessage(block: HTMLElement, qty: number) {
+    let blockEl = block.querySelector(".description") as HTMLElement;
+    if (qty) {
+      const user = qty === 1 ? "user" : "users";
+      blockEl.innerHTML = `You are exporting client settings for <span class="bold">${qty}</span> ${user}.`;
+    } else {
+      blockEl.innerHTML = `You have <span class="bold">not exported any client settings</span>.`;
+    }
+  }
+
   private showSystemSettingsMessage(block: HTMLElement, isIncluded: boolean) {
     let blockEl = block.querySelector(".description") as HTMLElement;
     if (isIncluded) {
@@ -560,6 +578,7 @@ class Addin {
     // this.userBuilder = new UserBuilder(api);
     this.zoneBuilder = new ZoneBuilder(api);
     this.addInBuilder = new AddInBuilder(api);
+    this.clientSettingsBuilder = new ClientSettingsBuilder(api);
     this.waiting = new Waiting();
   }
 
@@ -588,6 +607,20 @@ class Addin {
     this.toggleExportButton(true);
   };
 
+  private onPinnedAppsChange = () => {
+    this.applyPinnedAppsState();
+    this.toggleExportButton(true);
+  };
+
+  private applyPinnedAppsState() {
+    if (this.exportAllPinnedAppsCheckbox.checked) {
+      this.exportAllAddinsCheckbox.checked = true;
+      this.exportAllAddinsCheckbox.disabled = true;
+    } else {
+      this.exportAllAddinsCheckbox.disabled = false;
+    }
+  }
+
   addEventHandlers() {
     this.exportBtn.addEventListener("click", this.exportData, false);
     this.saveBtn.addEventListener("click", this.saveChanges, false);
@@ -606,6 +639,12 @@ class Addin {
       this.checkBoxValueChanged,
       false,
     );
+    this.exportAllPinnedAppsCheckbox.addEventListener(
+      "change",
+      this.onPinnedAppsChange,
+      false,
+    );
+    this.applyPinnedAppsState();
   }
 
   render() {
@@ -613,6 +652,7 @@ class Addin {
     // this.data.users = [];
     this.data.zones = [];
     this.data.addins = [];
+    this.data.clientSettings = [];
     //wire up the dom
     let mapMessageTemplate: string = (
         document.getElementById("mapMessageTemplate") as HTMLElement
@@ -644,6 +684,9 @@ class Addin {
       ) as HTMLElement,
       systemSettingsBlock: HTMLElement = document.getElementById(
         "exportSystemSettings",
+      ) as HTMLElement,
+      clientSettingsBlock: HTMLElement = document.getElementById(
+        "exportedClientSettings",
       ) as HTMLElement;
     this.toggleWaiting(true);
     const zonesQtyPromise =
@@ -733,6 +776,14 @@ class Addin {
         return this.resolveDependencies(dependencies, this.data);
       })
       .then(() => {
+        if (this.exportAllPinnedAppsCheckbox.checked && this.data.users.length) {
+          const userIds = this.data.users.map((u) => u.id);
+          return this.clientSettingsBuilder.fetch(userIds).then((cs) => {
+            this.data.clientSettings = cs;
+          });
+        }
+      })
+      .then(() => {
         // performance.mark("end");
         // performance.measure("resolveDependencies", "start", "end");
         // console.log(performance.getEntriesByName("resolveDependencies"));
@@ -777,6 +828,10 @@ class Addin {
           systemSettingsBlock,
           this.exportSystemSettingsCheckbox.checked,
         );
+        this.showClientSettingsMessage(
+          clientSettingsBlock,
+          this.data.clientSettings.length,
+        );
         //this displays all the data/objects in the console
         console.log(this.data);
       })
@@ -796,6 +851,7 @@ class Addin {
     this.distributionListsBuilder.unload();
     this.miscBuilder.unload();
     this.addInBuilder.unload();
+    this.clientSettingsBuilder.unload();
     this.exportBtn.removeEventListener("click", this.exportData, false);
     this.saveBtn.removeEventListener("click", this.saveChanges, false);
     this.exportAllAddinsCheckbox.removeEventListener(
@@ -811,6 +867,11 @@ class Addin {
     this.exportSystemSettingsCheckbox.removeEventListener(
       "change",
       this.checkBoxValueChanged,
+      false,
+    );
+    this.exportAllPinnedAppsCheckbox.removeEventListener(
+      "change",
+      this.onPinnedAppsChange,
       false,
     );
   }

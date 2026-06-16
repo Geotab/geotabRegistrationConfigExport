@@ -76,9 +76,20 @@
                         <p class="description">You have <span class="bold">not configured any add-ins</span>.</p>
                         <label id="exportAllAddins" class="geo-checkbox__label">
                             <input id="export_all_addins_checkbox" value="export_all_addins" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
-                            <span class="geo-checkbox__label-text">Export all add-ins</span>
+                            <span class="geo-checkbox__label-text infoText">Export all add-ins <span class="infoText-description">(disabled when "Export all pinned apps" is checked)</span></span>
                         </label>
                         <div class="alert"><b>Note:</b> Uncheck this box if you do not want to export all add-ins. If unchecked, no add-ins will be exported.</div>
+                    </div>
+                </li>
+                <li id="exportedClientSettings" class="erc-list__row-item">
+                    <h2 class="erc-list__header">Client Settings</h2>
+                    <div class="erc-list__record">
+                        <p class="description">You have <span class="bold">not configured any client settings</span>.</p>
+                        <label id="exportPinnedApps" class="geo-checkbox__label">
+                            <input id="export_all_pinned_apps_checkbox" value="export_all_pinned_apps" type="checkbox" class="geo-checkbox__box checkboxStyle" checked>
+                            <span class="geo-checkbox__label-text">Export all pinned apps</span>
+                        </label>
+                        <div class="alert"><b>Note:</b> When checked, pinned apps for all exported users will be included. Checking this option also enables "Export all add-ins".</div>
                     </div>
                 </li>
                 <!--

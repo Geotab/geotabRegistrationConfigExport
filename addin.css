@@ -365,6 +365,16 @@
     display: inline;
 }
 
+#export_all_addins_checkbox:disabled + .infoText {
+    font-weight: normal;
+    color: var(--erc-text-disabled);
+    margin-left: 5px;
+}
+
+#export_all_addins_checkbox:disabled + .infoText .infoText-description {
+    display: inline;
+}
+
 /* Footer Menu */
 .footer-menu {
     padding: var(--erc-spacing-md);
