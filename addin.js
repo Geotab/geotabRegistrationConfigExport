@@ -1046,6 +1046,46 @@
     }
   };
 
+  // sources/clientSettingsBuilder.ts
+  var ClientSettingsBuilder = class {
+    api;
+    abortController = {};
+    constructor(api) {
+      this.api = api;
+    }
+    fetch(userIds) {
+      if (!userIds.length) {
+        return Promise.resolve([]);
+      }
+      const calls = userIds.map((id) => [
+        "Get",
+        {
+          typeName: "ClientSettings",
+          search: { id }
+        }
+      ]);
+      this.abortController = {};
+      const promise = multiCall(this.api, calls).then((results) => {
+        return results.reduce(
+          (acc, result, index) => {
+            const settings = Array.isArray(result) ? result[0] : result;
+            const pinnedMenuItems = settings?.pinnedMenuItems ?? [];
+            if (pinnedMenuItems.length > 0) {
+              acc.push({ id: userIds[index], pinnedMenuItems });
+            }
+            return acc;
+          },
+          []
+        );
+      });
+      return promise;
+    }
+    unload() {
+      this.abortController.abort && this.abortController.abort();
+      this.abortController = {};
+    }
+  };
+
   // sources/addin.ts
   var Addin = class {
     api;
@@ -1056,6 +1096,7 @@
     distributionListsBuilder;
     miscBuilder;
     addInBuilder;
+    clientSettingsBuilder;
     // private readonly userBuilder: UserBuilder;
     zoneBuilder;
     exportBtn = document.getElementById(
@@ -1068,6 +1109,9 @@
     exportAllZonesCheckbox = document.getElementById("export_all_zones_checkbox");
     exportSystemSettingsCheckbox = document.getElementById(
       "export_system_settings_checkbox"
+    );
+    exportAllPinnedAppsCheckbox = document.getElementById(
+      "export_all_pinned_apps_checkbox"
     );
     waiting;
     currentTask;
@@ -1089,7 +1133,8 @@
       addins: [],
       notificationTemplates: [],
       certificates: [],
-      groupFilters: []
+      groupFilters: [],
+      clientSettings: []
     };
     combineDependencies(...allDependencies) {
       let total = {
@@ -1435,6 +1480,15 @@
         blockEl.innerHTML = `You have <span class="bold">not configured any ${entityName}s</span>.`;
       }
     }
+    showClientSettingsMessage(block, qty) {
+      let blockEl = block.querySelector(".description");
+      if (qty) {
+        const user = qty === 1 ? "user" : "users";
+        blockEl.innerHTML = `You are exporting client settings for <span class="bold">${qty}</span> ${user}.`;
+      } else {
+        blockEl.innerHTML = `You have <span class="bold">not exported any client settings</span>.`;
+      }
+    }
     showSystemSettingsMessage(block, isIncluded) {
       let blockEl = block.querySelector(".description");
       if (isIncluded) {
@@ -1454,6 +1508,7 @@
       this.miscBuilder = new MiscBuilder(api);
       this.zoneBuilder = new ZoneBuilder(api);
       this.addInBuilder = new AddInBuilder(api);
+      this.clientSettingsBuilder = new ClientSettingsBuilder(api);
       this.waiting = new Waiting();
     }
     //Brett: exports the data
@@ -1474,6 +1529,18 @@
     checkBoxValueChanged = () => {
       this.toggleExportButton(true);
     };
+    onPinnedAppsChange = () => {
+      this.applyPinnedAppsState();
+      this.toggleExportButton(true);
+    };
+    applyPinnedAppsState() {
+      if (this.exportAllPinnedAppsCheckbox.checked) {
+        this.exportAllAddinsCheckbox.checked = true;
+        this.exportAllAddinsCheckbox.disabled = true;
+      } else {
+        this.exportAllAddinsCheckbox.disabled = false;
+      }
+    }
     addEventHandlers() {
       this.exportBtn.addEventListener("click", this.exportData, false);
       this.saveBtn.addEventListener("click", this.saveChanges, false);
@@ -1492,10 +1559,17 @@
         this.checkBoxValueChanged,
         false
       );
+      this.exportAllPinnedAppsCheckbox.addEventListener(
+        "change",
+        this.onPinnedAppsChange,
+        false
+      );
+      this.applyPinnedAppsState();
     }
     render() {
       this.data.zones = [];
       this.data.addins = [];
+      this.data.clientSettings = [];
       let mapMessageTemplate = document.getElementById("mapMessageTemplate").innerHTML, groupsBlock = document.getElementById(
         "exportedGroups"
       ), securityClearancesBlock = document.getElementById(
@@ -1514,6 +1588,8 @@
         "exportedZones"
       ), systemSettingsBlock = document.getElementById(
         "exportSystemSettings"
+      ), clientSettingsBlock = document.getElementById(
+        "exportedClientSettings"
       );
       this.toggleWaiting(true);
       const zonesQtyPromise = this.exportAllZonesCheckbox.checked == true ? this.zoneBuilder.getQty() : Promise.resolve(0);
@@ -1586,6 +1662,13 @@
         );
         return this.resolveDependencies(dependencies, this.data);
       }).then(() => {
+        if (this.exportAllPinnedAppsCheckbox.checked && this.data.users.length) {
+          const userIds = this.data.users.map((u) => u.id);
+          return this.clientSettingsBuilder.fetch(userIds).then((cs) => {
+            this.data.clientSettings = cs;
+          });
+        }
+      }).then(() => {
         let mapProvider = this.data.misc && this.miscBuilder.getMapProviderName(this.data.misc.mapProvider.value);
         this.showEntityMessage(
           groupsBlock,
@@ -1624,6 +1707,10 @@
           systemSettingsBlock,
           this.exportSystemSettingsCheckbox.checked
         );
+        this.showClientSettingsMessage(
+          clientSettingsBlock,
+          this.data.clientSettings.length
+        );
         console.log(this.data);
       }).catch((e) => {
         console.error(e);
@@ -1639,6 +1726,7 @@
       this.distributionListsBuilder.unload();
       this.miscBuilder.unload();
       this.addInBuilder.unload();
+      this.clientSettingsBuilder.unload();
       this.exportBtn.removeEventListener("click", this.exportData, false);
       this.saveBtn.removeEventListener("click", this.saveChanges, false);
       this.exportAllAddinsCheckbox.removeEventListener(
@@ -1654,6 +1742,11 @@
       this.exportSystemSettingsCheckbox.removeEventListener(
         "change",
         this.checkBoxValueChanged,
+        false
+      );
+      this.exportAllPinnedAppsCheckbox.removeEventListener(
+        "change",
+        this.onPinnedAppsChange,
         false
       );
     }
