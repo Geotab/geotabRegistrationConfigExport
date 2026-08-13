@@ -831,6 +831,8 @@
           output.isMarketplacePurchasesAllowed = systemSettings.allowMarketplacePurchases;
           output.isResellerAutoLoginAllowed = systemSettings.allowResellerAutoLogin;
           output.isThirdPartyMarketplaceAppsAllowed = systemSettings.allowThirdPartyMarketplaceApps;
+          output.enableGreatLakesUi = systemSettings.enableGreatLakesUi;
+          output.defaultAppsConfig = systemSettings.defaultAppsConfig;
         }
         return output;
       });
