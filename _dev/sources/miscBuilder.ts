@@ -2,6 +2,22 @@ import { entityToDictionary, IHash, multiCall } from "./utils";
 
 type TMapProviderType = "default" | "additional" | "custom";
 
+interface IDefaultAppConfig {
+    isPinned?: boolean;
+    isThirdParty?: boolean;
+    name: string;
+}
+
+interface IDefaultPageConfig {
+    isPinned?: boolean;
+    name: string;
+}
+
+interface IDefaultAppsConfig {
+    apps: IDefaultAppConfig[];
+    pages: IDefaultPageConfig[];
+}
+
 export interface IMiscData {
     mapProvider: {
         value: string;
@@ -16,6 +32,8 @@ export interface IMiscData {
     isMarketplacePurchasesAllowed?: boolean;
     isResellerAutoLoginAllowed?: boolean;
     isThirdPartyMarketplaceAppsAllowed?: boolean;
+    enableGreatLakesUi?: boolean;
+    defaultAppsConfig?: IDefaultAppsConfig;
 }
 
 
@@ -84,6 +102,8 @@ export class MiscBuilder {
                 output.isMarketplacePurchasesAllowed = systemSettings.allowMarketplacePurchases;
                 output.isResellerAutoLoginAllowed = systemSettings.allowResellerAutoLogin;
                 output.isThirdPartyMarketplaceAppsAllowed = systemSettings.allowThirdPartyMarketplaceApps;
+                output.enableGreatLakesUi = systemSettings.enableGreatLakesUi;
+                output.defaultAppsConfig = systemSettings.defaultAppsConfig;
             }
             return output;
         });
