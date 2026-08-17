@@ -2,6 +2,7 @@ interface IAddinItem {
     url?: string;
     path?: string;
     menuId?: string;
+    appMenuId?: string;
     files?: any;
     page?: string;
     click?: string;
@@ -39,6 +40,9 @@ export class AddInBuilder {
 
     private isEmbeddedItem = (item: IAddinItem): boolean => !!item.files;
 
+    //Apps are add-ins that reference a built-in page by appMenuId instead of hosting a url.
+    private isAppItem = (item: IAddinItem): boolean => !item.url && !!item.appMenuId;
+
     private isValidMapAddin = (item: IAddinItem): boolean => {
         const scripts = item.mapScript;
         const isValidSrc = !scripts?.src || this.isValidUrl(scripts.src);
@@ -49,7 +53,7 @@ export class AddInBuilder {
     }
 
     private isValidItem = (item: IAddinItem): boolean => {
-        return this.isEmbeddedItem(item) || this.isMenuItem(item) || this.isValidButton(item) || this.isValidMapAddin(item) || (!!item.url && this.isValidUrl(item.url));
+        return this.isEmbeddedItem(item) || this.isMenuItem(item) || this.isAppItem(item) || this.isValidButton(item) || this.isValidMapAddin(item) || (!!item.url && this.isValidUrl(item.url));
     }
 
     private isCurrentAddin (addin: string) {
@@ -79,10 +83,7 @@ export class AddInBuilder {
             let addinConfig: IAddin = JSON.parse(addin);
             if(addinConfig.items) {
                 //Multi line addin structure check
-                return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(item => {
-                    let url = item.url;
-                    return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(this.isValidItem);
-                });
+                return Array.isArray(addinConfig.items) && addinConfig.items.every(this.isValidItem);
             }
             else {
                 //Single line addin structure check

@@ -547,8 +547,8 @@ class Addin {
   private showClientSettingsMessage(block: HTMLElement, qty: number) {
     let blockEl = block.querySelector(".description") as HTMLElement;
     if (qty) {
-      const user = qty === 1 ? "user" : "users";
-      blockEl.innerHTML = `You are exporting client settings for <span class="bold">${qty}</span> ${user}.`;
+      const app = qty === 1 ? "pinned app" : "pinned apps";
+      blockEl.innerHTML = `You are exporting <span class="bold">${qty}</span> ${app} for the current user.`;
     } else {
       blockEl.innerHTML = `You have <span class="bold">not exported any client settings</span>.`;
     }
@@ -648,8 +648,7 @@ class Addin {
   }
 
   render() {
-    //TODO: Brett - left here as I will be introducing the user fetch soon
-    // this.data.users = [];
+    this.data.users = [];
     this.data.zones = [];
     this.data.addins = [];
     this.data.clientSettings = [];
@@ -776,9 +775,9 @@ class Addin {
         return this.resolveDependencies(dependencies, this.data);
       })
       .then(() => {
-        if (this.exportAllPinnedAppsCheckbox.checked && this.data.users.length) {
-          const userIds = this.data.users.map((u) => u.id);
-          return this.clientSettingsBuilder.fetch(userIds).then((cs) => {
+        const currentUserId = this.data.misc?.currentUser?.id;
+        if (this.exportAllPinnedAppsCheckbox.checked && currentUserId) {
+          return this.clientSettingsBuilder.fetch([currentUserId]).then((cs) => {
             this.data.clientSettings = cs;
           });
         }
@@ -830,7 +829,10 @@ class Addin {
         );
         this.showClientSettingsMessage(
           clientSettingsBlock,
-          this.data.clientSettings.length,
+          this.data.clientSettings.reduce(
+            (qty, settings) => qty + (settings.pinnedMenuItems?.length || 0),
+            0,
+          ),
         );
         //this displays all the data/objects in the console
         console.log(this.data);

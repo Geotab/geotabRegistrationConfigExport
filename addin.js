@@ -956,6 +956,8 @@
     isValidUrl = (url) => !!url && url.indexOf("//") > -1;
     isValidButton = (item) => !!item.buttonName && !!item.page && !!item.click && this.isValidUrl(item.click);
     isEmbeddedItem = (item) => !!item.files;
+    //Apps are add-ins that reference a built-in page by appMenuId instead of hosting a url.
+    isAppItem = (item) => !item.url && !!item.appMenuId;
     isValidMapAddin = (item) => {
       const scripts = item.mapScript;
       const isValidSrc = !scripts?.src || this.isValidUrl(scripts.src);
@@ -965,7 +967,7 @@
       return hasScripts && isValidSrc && isValidStyle && isValidHtml;
     };
     isValidItem = (item) => {
-      return this.isEmbeddedItem(item) || this.isMenuItem(item) || this.isValidButton(item) || this.isValidMapAddin(item) || !!item.url && this.isValidUrl(item.url);
+      return this.isEmbeddedItem(item) || this.isMenuItem(item) || this.isAppItem(item) || this.isValidButton(item) || this.isValidMapAddin(item) || !!item.url && this.isValidUrl(item.url);
     };
     isCurrentAddin(addin) {
       return addin.indexOf("Registration config") > -1 || addin.toLowerCase().indexOf("registrationConfig".toLowerCase()) > -1;
@@ -987,10 +989,7 @@
         }
         let addinConfig = JSON.parse(addin);
         if (addinConfig.items) {
-          return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every((item) => {
-            let url = item.url;
-            return addinConfig && Array.isArray(addinConfig.items) && addinConfig.items.every(this.isValidItem);
-          });
+          return Array.isArray(addinConfig.items) && addinConfig.items.every(this.isValidItem);
         } else {
           return this.isValidItem(addinConfig);
         }
@@ -1485,8 +1484,8 @@
     showClientSettingsMessage(block, qty) {
       let blockEl = block.querySelector(".description");
       if (qty) {
-        const user = qty === 1 ? "user" : "users";
-        blockEl.innerHTML = `You are exporting client settings for <span class="bold">${qty}</span> ${user}.`;
+        const app = qty === 1 ? "pinned app" : "pinned apps";
+        blockEl.innerHTML = `You are exporting <span class="bold">${qty}</span> ${app} for the current user.`;
       } else {
         blockEl.innerHTML = `You have <span class="bold">not exported any client settings</span>.`;
       }
@@ -1569,6 +1568,7 @@
       this.applyPinnedAppsState();
     }
     render() {
+      this.data.users = [];
       this.data.zones = [];
       this.data.addins = [];
       this.data.clientSettings = [];
@@ -1664,9 +1664,9 @@
         );
         return this.resolveDependencies(dependencies, this.data);
       }).then(() => {
-        if (this.exportAllPinnedAppsCheckbox.checked && this.data.users.length) {
-          const userIds = this.data.users.map((u) => u.id);
-          return this.clientSettingsBuilder.fetch(userIds).then((cs) => {
+        const currentUserId = this.data.misc?.currentUser?.id;
+        if (this.exportAllPinnedAppsCheckbox.checked && currentUserId) {
+          return this.clientSettingsBuilder.fetch([currentUserId]).then((cs) => {
             this.data.clientSettings = cs;
           });
         }
@@ -1711,7 +1711,10 @@
         );
         this.showClientSettingsMessage(
           clientSettingsBlock,
-          this.data.clientSettings.length
+          this.data.clientSettings.reduce(
+            (qty, settings) => qty + (settings.pinnedMenuItems?.length || 0),
+            0
+          )
         );
         console.log(this.data);
       }).catch((e) => {
