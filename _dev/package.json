@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Tool for exporting default registration config in JSON file",
   "engines": {
-    "node": ">=4.0.0"
+    "node": "^24.22.1"
   },
   "scripts": {
     "startServer": "node ../../../start.js",
