@@ -34,6 +34,7 @@ export interface IMiscData {
     isThirdPartyMarketplaceAppsAllowed?: boolean;
     enableGreatLakesUi?: boolean;
     defaultAppsConfig?: IDefaultAppsConfig;
+    databaseTemplate?: string;
 }
 
 
@@ -104,6 +105,7 @@ export class MiscBuilder {
                 output.isThirdPartyMarketplaceAppsAllowed = systemSettings.allowThirdPartyMarketplaceApps;
                 output.enableGreatLakesUi = systemSettings.enableGreatLakesUi;
                 output.defaultAppsConfig = systemSettings.defaultAppsConfig;
+                output.databaseTemplate = systemSettings.databaseTemplate;
             }
             return output;
         });
